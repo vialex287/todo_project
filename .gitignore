@@ -8,6 +8,6 @@ __pycache__/   # Кэш Python
 venv/          # Папка виртуального окружения
 .env           # Файл с переменными окружения (пароли, ключи)
 .env.local     # Локальные настройки
-/Lib
+#/Lib/site-packages
 .pytest_cache/ # Кэш pytest
 .idea          # pycharm
