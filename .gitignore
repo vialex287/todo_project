@@ -1,13 +1,29 @@
 # Created by venv; see https://docs.python.org/3/library/venv.html
 
-# Python
-__pycache__/   # Кэш Python
-*.py[cod]      # Временные файлы .pyc, .pyo, .pyd
-*.so           # Скомпилированные бинарники
-.Python        # Файлы виртуального окружения
-venv/          # Папка виртуального окружения
-.env           # Файл с переменными окружения (пароли, ключи)
-.env.local     # Локальные настройки
-#/Lib/site-packages
-.pytest_cache/ # Кэш pytest
-.idea          # pycharm
+# Папки окружения (виртуальные среды, IDE)
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# Файлы окружения
+.env
+
+# Миграции (если они генерируются автоматически)
+app/migrations/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE и редакторы
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
