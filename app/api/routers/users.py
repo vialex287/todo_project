@@ -13,28 +13,29 @@ router_users = APIRouter(
 )
 
 
-# создать пользователя
-@router_users.post("/", response_model=UserResponseSchema)
-async def create_user(
-        user_data: UserCreateSchema,
-        db: AsyncSession = Depends(get_async_db)
-    ):
-    new_user = User(
-        name=user_data.name,
-        email=user_data.email
-    )
-
-    try:
-        db.add(new_user)
-        await db.commit()
-        await db.refresh(new_user)
-        return new_user
-    except:
-        await db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail="An internal server error occurred when creating the object"
-        )
+# # создать пользователя
+# @router_users.post("/", response_model=UserResponseSchema)
+# async def create_user(
+#         user_data: UserCreateSchema,
+#         db: AsyncSession = Depends(get_async_db)
+#     ):
+#     new_user = User(
+#         name=user_data.name,
+#         email=user_data.email,
+#         password=hash_password(user_data.password)
+#     )
+#
+#     try:
+#         db.add(new_user)
+#         await db.commit()
+#         await db.refresh(new_user)
+#         return new_user
+#     except:
+#         await db.rollback()
+#         raise HTTPException(
+#             status_code=500,
+#             detail="An internal server error occurred when creating the object"
+#         )
 
 
 # показать всех пользователей
@@ -81,6 +82,10 @@ async def update_user(
 
     if new_data.email is not None:
         user.email = new_data.email
+
+    if new_data.hashed_password:
+        user.password = new_data.hashed_password
+
     try:
         await db.commit()
         await db.refresh(user)
