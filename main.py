@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 import asyncio
 from app.core.database import Base, engine
-from app.api.routers import router_tasks, router_users
+from app.api.routers import router_tasks, router_users, router_auth
 
 app = FastAPI()
 
@@ -22,6 +22,7 @@ async def startup_event():
 #view headers
 app.include_router(router_users)
 app.include_router(router_tasks)
+app.include_router(router_auth)
 
 
 if __name__ == '__main__':

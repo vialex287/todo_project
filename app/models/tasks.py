@@ -5,7 +5,7 @@ from app.core.database import Base
 from app.schemas.tasks import TaskEnum
 
 class Task(Base):
-    __tablename__ = 'Task'
+    __tablename__ = 'Tasks'
     __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True)
@@ -15,7 +15,7 @@ class Task(Base):
     deadline = Column(DateTime, default=(datetime.now(timezone.utc) + timedelta(days=1)))
     is_complited = Column(Boolean, default=False)
 
-    user_id = Column(Integer, ForeignKey("User.id"))
+    user_id = Column(Integer, ForeignKey("Users.id"))
     user = relationship("User", back_populates="tasks")
 
     async def update_status(self):
