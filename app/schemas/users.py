@@ -1,10 +1,17 @@
 from pydantic import BaseModel, Field
+from enum import Enum as PyEnum
+
+class UserRoleEnum(str, PyEnum):
+    ADMIN = "admin"
+    USER = "user"
+
 
 class UserCreateSchema(BaseModel):
-    task_id: int
+    user_id: int
     name: str
     email: str = Field(unique=True)
     hashed_password: str
+    role: UserRoleEnum = Field(default=UserRoleEnum.USER)
 
 
 class UserUpdateSchema(BaseModel):
@@ -18,6 +25,7 @@ class UserResponseSchema(BaseModel):
     name: str
     email: str
     hashed_password: str
+    role: UserRoleEnum
     is_active: bool
 
     class Config:

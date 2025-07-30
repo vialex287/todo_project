@@ -4,7 +4,10 @@ import asyncio
 from app.core.database import Base, engine
 from app.api.routers import router_tasks, router_users, router_auth
 
-app = FastAPI()
+app = FastAPI(
+    # swagger_ui_init_oauth=None,
+    # swagger_ui_parameters={"oauth2RedirectUrl": None}
+)
 
 # create tables
 async def create_tables():

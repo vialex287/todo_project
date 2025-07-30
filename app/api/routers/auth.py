@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,Form
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +30,8 @@ async def register(
         name=user_data.name,
         email=user_data.email,
         hashed_password=hashed,
-        is_active=True
+        is_active=True,
+        role=user_data.role
     )
 
     try:
@@ -46,6 +47,7 @@ async def register(
         )
 
 
+# авторизация
 @router_auth.post("/login")
 async def login(creds: UserAuthSchema,
                 db: AsyncSession = Depends(get_async_db)):
@@ -65,3 +67,29 @@ async def login(creds: UserAuthSchema,
     token = create_access_token({"sub": user.email})
 
     return {"access_token": token}
+
+
+# авторизация для swagger ui
+@router_auth.post("/token")
+async def login_token(username: str = Form(...),
+                      password: str = Form(...),
+                      db: AsyncSession = Depends(get_async_db)
+            ):
+    res = await db.execute(select(User).where(User.email == username))
+    user = res.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="User is not found")
+
+    if not user.is_active:
+        raise HTTPException(status_code=401, detail="User is blocked")
+
+    if not verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid password")
+
+    token = create_access_token({"sub": user.email})
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }

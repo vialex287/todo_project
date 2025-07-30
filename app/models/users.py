@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, Enum
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from app.schemas.users import UserRoleEnum
 
 
 class User(Base):
@@ -11,6 +12,7 @@ class User(Base):
     name = Column(String(50))
     email = Column(String(100), unique=True)
     hashed_password = Column(String(100), nullable=False)
+    role = Column(Enum(UserRoleEnum), default=UserRoleEnum.USER, nullable=False)
     is_active = Column(Boolean, default=True)
 
     tasks = relationship("Task", back_populates="user")
