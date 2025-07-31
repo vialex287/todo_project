@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from datetime import datetime, timezone, timedelta
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Form, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -25,6 +25,8 @@ pwd_context = CryptContext(schemes=["pbkdf2_sha256"],
                            bcrypt__rounds=12)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
+### Токены ###
+
 
 # Создать токен
 def create_access_token(data: dict):
@@ -32,13 +34,48 @@ def create_access_token(data: dict):
     return jwt.encode({**data, "exp": expires}, SECRET_KEY, algorithm=ALGORITHM)
 
 
+# Создать обновляющий токен
+def create_refresh_token(data: dict):
+    expires = datetime.now(timezone.utc) + timedelta(days=7)
+    return jwt.encode({**data, "exp": expires}, SECRET_KEY, algorithm=ALGORITHM)
+
+
+# извлекатель токена из заголовка или cookie
+def extract_token(request: Request, name_token) -> str:
+    if name_token == "access_token":
+        auth_header = request.headers.get("Autorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            return auth_header[len("Bearer "):]
+
+    cookie_token = request.cookies.get(name_token)
+    if cookie_token:
+        return cookie_token
+
+    raise HTTPException(status_code=401, detail="Token is not found")
+
+
 # проверить токен отдельно
-def verify_token(token: str = Depends(oauth2_scheme)):
+def verify_access_token(request: Request):
+    token = extract_token(request, "access_token")
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Uncorrected token")
+
+
+# проверить рефреш-токен отдельно
+def verify_refresh_token(request: Request):
+    # refresh_token: str = Form(...) то что было в значении функции
+    token = extract_token(request, "refresh_token")
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
 
 # проверка токена
 async def get_current_user(
@@ -65,6 +102,9 @@ async def get_current_user(
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
+
+### Другое ###
 
 # хэширование паролей
 def hash_password(password: str) -> str:
