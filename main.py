@@ -4,6 +4,7 @@ import asyncio
 from app.core.database import Base, engine
 from app.api.routers import router_tasks, router_users, router_auth
 
+
 app = FastAPI()
 
 # create tables
