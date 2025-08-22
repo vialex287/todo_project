@@ -13,15 +13,19 @@ class Task(Base):
     description = Column(String(256))
     status = Column(Enum(TaskEnum), default=TaskEnum.IN_PROGRESS, nullable=False, index=True)
     deadline = Column(DateTime, default=(datetime.now(timezone.utc) + timedelta(days=1)), index=True)
-    is_complited = Column(Boolean, default=False, index=True)
+    is_completed = Column(Boolean, default=False, index=True)
 
     user_id = Column(Integer, ForeignKey("Users.id"))
     user = relationship("User", back_populates="tasks")
 
     async def update_status(self):
-        if self.is_complited:
+        if self.is_completed:
             self.status = TaskEnum.DONE
         elif self.deadline < datetime.now(timezone.utc):
             self.status = TaskEnum.EXPIRED
         else:
             self.status = TaskEnum.IN_PROGRESS
+
+    def __repr__(self):
+        return f"<Task id={self.id} title={self.title} status={self.status}>"
+

@@ -6,6 +6,7 @@ from app.schemas.users import UserCreateSchema, UserAuthSchema
 from app.api.auth.auth import verify_password, hash_password, create_access_token, create_refresh_token, verify_refresh_token
 from app.dependencies import get_async_db
 
+
 async def register_user(user_data: UserCreateSchema,
                         db: AsyncSession = Depends(get_async_db)) -> User:
     # хэширование пароля
@@ -90,6 +91,7 @@ async def login_user_token(response: Response,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
+
 
 # обновление access токена
 async def refresh_user_token(request: Request):

@@ -8,28 +8,28 @@ class TaskEnum(str, PyEnum):
     EXPIRED = "Expired"
 
 
-class TaskCreateSchema(BaseModel):
+class TaskBaseSchema(BaseModel):
     title: str
     description: str
     status: TaskEnum = Field(default=TaskEnum.IN_PROGRESS)
     deadline: datetime
-    is_complited: bool = Field(default=False)
+    is_completed: bool = Field(default=False)
+
+
+class TaskCreateSchema(TaskBaseSchema):
+    pass
+
 
 class TaskUpdateSchema(BaseModel):
-    title: str | None
-    description: str | None
-    deadline: datetime | None
-    is_complited: bool | None = Field(default=False)
+    title: str | None = Field(default=None)
+    description: str | None  = Field(default=None)
+    status: TaskEnum | None  = Field(default=None)
+    deadline: datetime | None  = Field(default=None)
 
 
-class TaskResponseSchema(BaseModel):
+class TaskResponseSchema(TaskBaseSchema):
     id: int
     user_id: int
-    title: str
-    description: str
-    status: TaskEnum
-    deadline: datetime
-    is_complited: bool
 
     class Config:
         from_attributes = True

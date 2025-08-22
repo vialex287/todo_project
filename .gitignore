@@ -27,3 +27,4 @@ __pycache__/
 *.log
 *.tmp
 *.temp
+/.coverage

@@ -1,36 +1,54 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from enum import Enum as PyEnum
+import re
+
+from app.dependencies import validate_email
+
 
 class UserRoleEnum(str, PyEnum):
     ADMIN = "admin"
     USER = "user"
 
 
-class UserCreateSchema(BaseModel):
-    user_id: int
+class UserBaseSchema(BaseModel):
     name: str
-    email: str = Field(unique=True)
-    hashed_password: str
+    email: str
     role: UserRoleEnum = Field(default=UserRoleEnum.USER)
+
+    @field_validator('email')
+    @classmethod
+    def check_email(cls, email_):
+        return validate_email(email_)
+
+
+class UserCreateSchema(UserBaseSchema):
+    hashed_password: str
 
 
 class UserUpdateSchema(BaseModel):
-    name: str | None = None
-    email: str | None = Field(unique=True)
-    hashed_password: str
+    name: str | None = Field(default=None)
+    email: str | None = Field(default=None, json_schema_extra={"unique": True})
+    hashed_password: str | None = Field(default=None)
+    role: UserRoleEnum | None = Field(default=None)
+
+    @field_validator('email')
+    @classmethod
+    def check_email(cls, email_):
+        return validate_email(email_)
 
 
-class UserResponseSchema(BaseModel):
+class UserResponseSchema(UserBaseSchema):
     id: int
-    name: str
-    email: str
-    hashed_password: str
-    role: UserRoleEnum
     is_active: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
+
 
 class UserAuthSchema(BaseModel):
     email: str
     hashed_password: str
+
+    @field_validator('email')
+    @classmethod
+    def check_email(cls, email_):
+        return validate_email(email_)

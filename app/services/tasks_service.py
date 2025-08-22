@@ -20,7 +20,7 @@ async def create_task_user(
         description=task_data.description,
         status=task_data.status.value,
         deadline=task_data.deadline,
-        is_complited=False
+        is_completed=False
     )
 
     try:
@@ -95,8 +95,8 @@ async def update_task_from_user(
     if new_data.deadline:
         task.deadline = new_data.deadline
 
-    if new_data.is_complited:
-        task.is_complited = new_data.is_complited
+    if new_data.is_completed:
+        task.is_completed = new_data.is_completed
 
     try:
         await task.update_status()
