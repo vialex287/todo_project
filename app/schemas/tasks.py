@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from enum import Enum as PyEnum
+from typing import Optional
+
 
 class TaskEnum(str, PyEnum):
     DONE = "Done"
@@ -21,10 +23,11 @@ class TaskCreateSchema(TaskBaseSchema):
 
 
 class TaskUpdateSchema(BaseModel):
-    title: str | None = Field(default=None)
-    description: str | None  = Field(default=None)
-    status: TaskEnum | None  = Field(default=None)
-    deadline: datetime | None  = Field(default=None)
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[TaskEnum] = None
+    deadline: Optional[datetime] = None
+    is_completed: Optional[bool] = None
 
 
 class TaskResponseSchema(TaskBaseSchema):

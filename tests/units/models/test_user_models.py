@@ -14,12 +14,12 @@ class TestUserModelValid:
         user = User(
             name="Test User",
             email="test@example.com",
-            hashed_password="password_123"
+            password="password_123"
         )
 
         assert user.name == "Test User"
         assert user.email == "test@example.com"
-        assert user.hashed_password == "password_123"
+        assert user.password == "password_123"
         assert user.role in [None, UserRoleEnum.USER]
         assert user.is_active in [None, True]
         assert user.tasks == []
@@ -28,7 +28,7 @@ class TestUserModelValid:
         assert hasattr(User, 'id')
         assert hasattr(User, 'name')
         assert hasattr(User, 'email')
-        assert hasattr(User, 'hashed_password')
+        assert hasattr(User, 'password')
         assert hasattr(User, 'role')
         assert hasattr(User, 'is_active')
 
@@ -44,7 +44,7 @@ class TestUserModelValid:
         user = User(
             name="Admin User",
             email="admin@example.com",
-            hashed_password="hashed_password_123",
+            password="hashed_password_123",
             role=UserRoleEnum.ADMIN
         )
 
@@ -55,7 +55,7 @@ class TestUserModelValid:
 
     # password #
     def test_user_password_not_nullable(self):
-        assert User.hashed_password.nullable is False
+        assert User.password.nullable is False
 
     # relationship tasks
     def test_user_relationship_tasks(self):

@@ -22,13 +22,13 @@ class UserBaseSchema(BaseModel):
 
 
 class UserCreateSchema(UserBaseSchema):
-    hashed_password: str
+    password: str
 
 
 class UserUpdateSchema(BaseModel):
     name: str | None = Field(default=None)
     email: str | None = Field(default=None, json_schema_extra={"unique": True})
-    hashed_password: str | None = Field(default=None)
+    password: str | None = Field(default=None)
     role: UserRoleEnum | None = Field(default=None)
 
     @field_validator('email')
@@ -46,7 +46,7 @@ class UserResponseSchema(UserBaseSchema):
 
 class UserAuthSchema(BaseModel):
     email: str
-    hashed_password: str
+    password: str
 
     @field_validator('email')
     @classmethod

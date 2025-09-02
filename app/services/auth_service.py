@@ -9,18 +9,17 @@ from app.dependencies import get_async_db
 
 async def register_user(user_data: UserCreateSchema,
                         db: AsyncSession = Depends(get_async_db)) -> User:
-    # хэширование пароля
-    hashed = hash_password(user_data.hashed_password)
 
-    # проверка на существование пользователя
+    hashed = hash_password(user_data.password)
+
     user = await db.execute(select(User).where(User.email == user_data.email))
     if user.scalars().first():
-        raise HTTPException(status_code=401, detail="Email already exist")
+        raise HTTPException(status_code=409, detail="Email already exist")
 
     new_user = User(
         name=user_data.name,
         email=user_data.email,
-        hashed_password=hashed,
+        password=hashed,
         is_active=True,
         role=user_data.role
     )
@@ -48,18 +47,20 @@ async def login_user(creds: UserAuthSchema,
         raise HTTPException(status_code=401, detail="User is not found")
 
     if not user.is_active:
-        raise HTTPException(status_code=401, detail="User is blocked")
+        raise HTTPException(status_code=403, detail="User is blocked")
 
-    if not verify_password(creds.hashed_password, user.hashed_password):
+    if not verify_password(creds.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid password")
 
     access_token = create_access_token({"sub": user.email})
     refresh_token = create_refresh_token({"sub": user.email})
 
 
-    return {"access_token": access_token,
+    return {
+            "email": user.email,
+            "access_token": access_token,
             "refresh_token": refresh_token,
-            }
+        }
 
 
 async def login_user_token(response: Response,
@@ -75,25 +76,25 @@ async def login_user_token(response: Response,
     if not user.is_active:
         raise HTTPException(status_code=401, detail="User is blocked")
 
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         raise HTTPException(status_code=401, detail="Invalid password")
 
-    # токены
+    # tokens
     access_token = create_access_token({"sub": user.email})
-    refresh_token = create_access_token({"sub": user.email})
+    refresh_token = create_refresh_token({"sub": user.email})
 
-    # куки
+    # cookies
     response.set_cookie("access_token", access_token, httponly=True, max_age=900)
     response.set_cookie("refresh_token", refresh_token, httponly=True, max_age=86400)
 
     return {
+        "email": user.email,
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
 
 
-# обновление access токена
 async def refresh_user_token(request: Request):
     try:
         payload = verify_refresh_token(request)
@@ -108,5 +109,8 @@ async def refresh_user_token(request: Request):
     new_access_token = create_access_token({"sub": email})
     return {
         "message": "Refresh token is valid",
-        "access_token": new_access_token, "token_type": "bearer"
+        "email": email,
+        "access_token": new_access_token,
+        "token_type": "bearer",
     }
+
