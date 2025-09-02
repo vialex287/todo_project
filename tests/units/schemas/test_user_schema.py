@@ -14,13 +14,13 @@ class TestUserCreateSchema:
         data = {
             "name": "Anna",
             "email": "anna@example.com",
-            "hashed_password": "Anna123",
+            "password": "Anna123",
         }
 
         schema = UserCreateSchema(**data)
         assert schema.name == "Anna"
         assert schema.email == "anna@example.com"
-        assert schema.hashed_password == "Anna123"
+        assert schema.password == "Anna123"
         assert schema.role == UserRoleEnum.USER
 
     def test_default_role(self):
@@ -29,7 +29,7 @@ class TestUserCreateSchema:
         data = {
             "name": "Alice",
             "email": "alice@example.com",
-            "hashed_password": "hashedpass123",
+            "password": "hashedpass123",
         }
 
         schema = UserCreateSchema(**data)
@@ -41,7 +41,7 @@ class TestUserCreateSchema:
         data = {
             "name": "Bob",
             "email": "bob@example.com",
-            "hashed_password": "secure123",
+            "password": "secure123",
             "role": UserRoleEnum.ADMIN,
         }
 
@@ -54,7 +54,7 @@ class TestUserCreateSchema:
         data = {
             "name": "Bob",
             "email": "bob@example.com",
-            "hashed_password": "secure123",
+            "password": "secure123",
             "id": 999,
             "field": "value"
         }
@@ -68,7 +68,7 @@ class TestUserCreateSchema:
         data = {
             "name": "Alice",
             "email": "not-an-email",
-            "hashed_password": "123",
+            "password": "123",
         }
 
         with pytest.raises(ValidationError):
@@ -84,7 +84,7 @@ class TestUserUpdateSchema:
         schema = UserUpdateSchema()
         assert schema.name is None
         assert schema.email is None
-        assert schema.hashed_password is None
+        assert schema.password is None
         assert schema.role is None
 
     def test_update_name(self):
@@ -92,8 +92,8 @@ class TestUserUpdateSchema:
         assert schema.name == "NewName"
 
     def test_update_password(self):
-        schema = UserUpdateSchema(hashed_password="Fcg43gv")
-        assert schema.hashed_password == "Fcg43gv"
+        schema = UserUpdateSchema(password="Fcg43gv")
+        assert schema.password == "Fcg43gv"
 
     def test_update_role(self):
         schema = UserUpdateSchema(role=UserRoleEnum.ADMIN)
@@ -172,19 +172,19 @@ class TestUserAuthSchema:
     def test_valid(self):
         data = {
             "email": "user@example.com",
-            "hashed_password": "Password123",
+            "password": "Password123",
         }
 
         schema = UserAuthSchema(**data)
         assert schema.email == "user@example.com"
-        assert schema.hashed_password == "Password123"
+        assert schema.password == "Password123"
 
     # errors #
 
     def test_invalid_email(self):
         data = {
             "email": "no email",
-            "hashed_password": "Password123",
+            "password": "Password123",
         }
 
         with pytest.raises(ValidationError):
@@ -192,7 +192,7 @@ class TestUserAuthSchema:
 
     def test_missing_email(self):
         with pytest.raises(ValidationError):
-            UserAuthSchema(hashed_password="Password123")
+            UserAuthSchema(password="Password123")
 
     def test_missing_password(self):
         with pytest.raises(ValidationError):

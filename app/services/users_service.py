@@ -57,14 +57,23 @@ async def update_user_(
     user = await db.get(User, user_id)
     await user_valid(user)
 
+
+    if current_user.id != user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="You are not admin")
+
     if new_data.name:
         user.name = new_data.name
 
     if new_data.email is not None:
         user.email = new_data.email
 
-    if new_data.hashed_password:
-        user.password = new_data.hashed_password
+    if new_data.password:
+        user.password = new_data.password
+
+    if current_user.role != "admin" and new_data.role is not None:
+        raise HTTPException(status_code=403, detail="You are not admin")
+    elif current_user.role == "admin" and new_data.role is not None:
+        user.role = new_data.role
 
     try:
         await db.commit()
@@ -82,11 +91,11 @@ async def delete_user_(
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_current_user)
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="You are not admin")
-
     user = await db.get(User, user_id)
     await user_valid(user)
+
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
         await db.delete(user)

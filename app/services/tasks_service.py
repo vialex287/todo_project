@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.dependencies import get_async_db, user_valid, task_valid
 from app.schemas.tasks import TaskCreateSchema, TaskUpdateSchema
 from app.models import Task, User
@@ -44,7 +45,7 @@ async def get_tasks_from_user(
     user = await db.get(User, user_id)
     await user_valid(user)
 
-    res_tasks = await db.execute(select(Task).where(Task.user == user))
+    res_tasks = await db.execute(select(Task).where(Task.user_id == user.id))
     tasks = res_tasks.scalars().all()
 
     if not tasks:
@@ -64,6 +65,9 @@ async def get_task_from_user(user_id: int,
 
     task = await db.get(Task, task_id)
     await task_valid(task)
+
+    if task.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Task does not belong to this user")
 
     try:
         return task
@@ -86,6 +90,9 @@ async def update_task_from_user(
     task = await db.get(Task, task_id)
     await task_valid(task)
 
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
     if new_data.title:
         task.title = new_data.title
 
@@ -97,6 +104,9 @@ async def update_task_from_user(
 
     if new_data.is_completed:
         task.is_completed = new_data.is_completed
+
+    if task.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
         await task.update_status()
@@ -122,9 +132,16 @@ async def delete_task_from_user(
     task = await db.get(Task, task_id)
     await task_valid(task)
 
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if task.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not admin")
+
     try:
         await db.delete(task)
         await db.commit()
+        await db.flush()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except:
         raise HTTPException(

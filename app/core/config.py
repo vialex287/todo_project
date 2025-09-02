@@ -6,6 +6,7 @@ load_dotenv()
 class Settings(BaseSettings):
     # databases
     DB_USER: str
+    DB_TYPE: str
     DB_PASSWORD: str
     DB_HOST: str
     DB_PORT: int
@@ -22,7 +23,7 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self):
-        return (f"mysql+aiomysql://{self.DB_USER}:{self.DB_PASSWORD}@"
+        return (f"{self.DB_TYPE}://{self.DB_USER}:{self.DB_PASSWORD}@"
                 f"{self.DB_HOST}/{self.DB_NAME}"
                 f"?charset=utf8mb4"
         )

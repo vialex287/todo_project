@@ -16,7 +16,6 @@ router_users = APIRouter(
 )
 
 
-# показать всех пользователей
 @router_users.get("/", response_model=List[UserResponseSchema])
 async def get_users(
         db: AsyncSession = Depends(get_async_db),
@@ -25,7 +24,6 @@ async def get_users(
     return await get_users_(db, current_user)
 
 
-# показать конкретного пользователя
 @router_users.get("/{user_id}", response_model=UserResponseSchema)
 async def get_user(user_id: int,
                    db: AsyncSession = Depends(get_async_db),
@@ -34,7 +32,6 @@ async def get_user(user_id: int,
     return await get_user_(user_id, db, current_user)
 
 
-# обновить информацию о пользователе
 @router_users.put("/{user_id}")
 async def update_user(
         user_id: int,
@@ -45,7 +42,6 @@ async def update_user(
     return await update_user_(user_id, new_data, db, current_user)
 
 
-# удалить пользователя
 @router_users.delete("/{user_id}")
 async def delete_user(
         user_id: int,

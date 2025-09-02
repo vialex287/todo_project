@@ -32,7 +32,7 @@ class TestTaskModel:
         assert hasattr(Task, 'user_id')
 
     def test_task_relationships_exist(self):
-        user = User(name="Test", email="test@test.com", hashed_password="123")
+        user = User(name="Test", email="test@test.com", password="123")
         task = Task(title="Task", user=user)
         assert task.user is user
         assert user.tasks[0] is task
