@@ -1,11 +1,10 @@
-from logging.config import fileConfig
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import pool
 import asyncio
+from logging.config import fileConfig
+
 from alembic import context
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.config import settings
-from app.models import *
 from app.core.database import Base
 
 
@@ -86,6 +85,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     asyncio.run(run_migrations_online())
-
-
-

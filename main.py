@@ -1,11 +1,13 @@
-from fastapi import FastAPI
-import uvicorn
 import asyncio
-from app.core.database import Base, engine
-from app.api.routers import router_tasks, router_users, router_auth
 
+import uvicorn
+from fastapi import FastAPI
+
+from app.api.routers import router_auth, router_tasks, router_users
+from app.core.database import Base, engine
 
 app = FastAPI()
+
 
 # create tables
 async def create_tables():
@@ -20,11 +22,11 @@ async def startup_event():
     await create_tables()
 
 
-#view headers
+# view headers
 app.include_router(router_users)
 app.include_router(router_tasks)
 app.include_router(router_auth)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)

@@ -1,7 +1,6 @@
-import pytest
 from datetime import datetime, timedelta, timezone
-from sqlalchemy.exc import IntegrityError, StatementError
-from sqlalchemy.orm.exc import StaleDataError
+
+import pytest
 
 from app.models.tasks import Task
 from app.models.users import User
@@ -12,6 +11,7 @@ from app.schemas.tasks import TaskEnum
 # ------------------------------------------------------
 # SUCCESS
 # ------------------------------------------------------
+
 
 class TestTaskModelSuccess:
 
@@ -55,16 +55,21 @@ class TestTaskModelSuccess:
     @pytest.mark.asyncio
     async def test_update_status_in_progress(self, test_db):
         future_deadline = datetime.now(timezone.utc) + timedelta(days=1)
-        task = Task(title="In Progress Task", deadline=future_deadline.replace(tzinfo=timezone.utc))
+        task = Task(
+            title="In Progress Task",
+            deadline=future_deadline.replace(tzinfo=timezone.utc),
+        )
         test_db.add(task)
         await test_db.flush()
 
         await task.update_status()
         assert task.status == TaskEnum.IN_PROGRESS
 
+
 # ------------------------------------------------------
 # ERRORS
 # ------------------------------------------------------
+
 
 class TestTaskModelErrors:
 

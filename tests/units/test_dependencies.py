@@ -1,8 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from fastapi import HTTPException
 
-from app.dependencies import validate_email, user_valid, task_valid
+from app.dependencies import task_valid, user_valid, validate_email
 
 
 class TestUserValid:
@@ -61,18 +62,17 @@ class TestValidateEmail:
 
     # errrors #
 
-    @pytest.mark.parametrize("invalid_email", [
-        "invalid-email",
-        "test@",
-        "test@example",
-        "test @example.com",
-        "",
-        "test@@example.com",
-    ])
+    @pytest.mark.parametrize(
+        "invalid_email",
+        [
+            "invalid-email",
+            "test@",
+            "test@example",
+            "test @example.com",
+            "",
+            "test@@example.com",
+        ],
+    )
     def test_validate_email_invalid(self, invalid_email):
         with pytest.raises(ValueError, match="Invalid email format"):
             validate_email(invalid_email)
-
-
-
-

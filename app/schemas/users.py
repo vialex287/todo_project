@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field, ConfigDict, field_validator
 from enum import Enum as PyEnum
-import re
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.dependencies import validate_email
 
@@ -15,7 +15,7 @@ class UserBaseSchema(BaseModel):
     email: str
     role: UserRoleEnum = Field(default=UserRoleEnum.USER)
 
-    @field_validator('email')
+    @field_validator("email")
     @classmethod
     def check_email(cls, email_):
         return validate_email(email_)
@@ -31,7 +31,7 @@ class UserUpdateSchema(BaseModel):
     password: str | None = Field(default=None)
     role: UserRoleEnum | None = Field(default=None)
 
-    @field_validator('email')
+    @field_validator("email")
     @classmethod
     def check_email(cls, email_):
         return validate_email(email_)
@@ -41,14 +41,14 @@ class UserResponseSchema(UserBaseSchema):
     id: int
     is_active: bool
 
-    model_config = ConfigDict(from_attributes = True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserAuthSchema(BaseModel):
     email: str
     password: str
 
-    @field_validator('email')
+    @field_validator("email")
     @classmethod
     def check_email(cls, email_):
         return validate_email(email_)

@@ -1,7 +1,8 @@
-from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
 
 load_dotenv()
+
 
 class Settings(BaseSettings):
     # databases
@@ -23,9 +24,11 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self):
-        return (f"{self.DB_TYPE}://{self.DB_USER}:{self.DB_PASSWORD}@"
-                f"{self.DB_HOST}/{self.DB_NAME}"
-                f"?charset=utf8mb4"
+        return (
+            f"{self.DB_TYPE}://{self.DB_USER}:{self.DB_PASSWORD}@"
+            f"{self.DB_HOST}/{self.DB_NAME}"
+            f"?charset=utf8mb4"
         )
+
 
 settings = Settings()

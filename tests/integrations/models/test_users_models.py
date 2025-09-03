@@ -1,10 +1,10 @@
 import pytest
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
-from sqlalchemy.exc import IntegrityError, StatementError
 
-from app.models.users import User
 from app.models.tasks import Task
+from app.models.users import User
 from app.schemas.users import UserRoleEnum
 
 # pytest tests/integrations/models/test_users_models.py
@@ -12,6 +12,7 @@ from app.schemas.users import UserRoleEnum
 # ------------------------------------------------------
 # SUCCESS
 # ------------------------------------------------------
+
 
 class TestUserModelSuccess:
 
@@ -22,7 +23,7 @@ class TestUserModelSuccess:
             email="alice@example.com",
             password="hashed_pw",
             role=UserRoleEnum.ADMIN,
-            is_active=True
+            is_active=True,
         )
         test_db.add(user)
         await test_db.commit()
@@ -33,7 +34,6 @@ class TestUserModelSuccess:
         assert user.email == "alice@example.com"
         assert user.role == UserRoleEnum.ADMIN
         assert user.is_active is True
-
 
     @pytest.mark.asyncio
     async def test_update_user(self, test_db, user_factory):
@@ -76,7 +76,9 @@ class TestUserModelSuccess:
         await test_db.commit()
 
         result = await test_db.execute(
-            select(User).options(selectinload(User.tasks)).where(User.id == user.id)
+            select(User)
+            .options(selectinload(User.tasks))
+            .where(User.id == user.id)
         )
         user_with_tasks = result.scalar_one()
 
@@ -89,6 +91,7 @@ class TestUserModelSuccess:
 # ------------------------------------------------------
 # ERRORS
 # ------------------------------------------------------
+
 
 class TestUserModelErrors:
 
@@ -107,11 +110,7 @@ class TestUserModelErrors:
 
     @pytest.mark.asyncio
     async def test_null_password_not_allowed(self, test_db):
-        user = User(
-            name="NoPass",
-            email="nopass@example.com",
-            password=None
-        )
+        user = User(name="NoPass", email="nopass@example.com", password=None)
         test_db.add(user)
 
         with pytest.raises(IntegrityError):

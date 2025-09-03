@@ -1,5 +1,6 @@
 import pytest
 from pydantic_core import ValidationError
+
 from app.core.config import Settings
 
 # pytest tests/integrations/core/test_config.py
