@@ -76,9 +76,7 @@ class TestUserModelSuccess:
         await test_db.commit()
 
         result = await test_db.execute(
-            select(User)
-            .options(selectinload(User.tasks))
-            .where(User.id == user.id)
+            select(User).options(selectinload(User.tasks)).where(User.id == user.id)
         )
         user_with_tasks = result.scalar_one()
 

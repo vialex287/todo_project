@@ -13,9 +13,7 @@ class User(Base):
     name = Column(String(50), index=True)
     email = Column(String(100), unique=True, index=True)
     password = Column(String(100), nullable=False)
-    role = Column(Enum(UserRoleEnum),
-                  default=UserRoleEnum.USER,
-                  nullable=False)
+    role = Column(Enum(UserRoleEnum), default=UserRoleEnum.USER, nullable=False)
     is_active = Column(Boolean, default=True, index=True)
 
     tasks = relationship("Task", back_populates="user")

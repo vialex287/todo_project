@@ -8,9 +8,8 @@ from app.models import Task, User
 from app.schemas.tasks import TaskCreateSchema, TaskUpdateSchema
 
 
-async def create_task_user(user_id: int,
-                           task_data: TaskCreateSchema,
-                           db: AsyncSession = Depends(get_async_db)
+async def create_task_user(
+    user_id: int, task_data: TaskCreateSchema, db: AsyncSession = Depends(get_async_db)
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
@@ -34,23 +33,19 @@ async def create_task_user(user_id: int,
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred "
-                   "when creating the object",
+            detail="An internal server error occurred " "when creating the object",
         )
 
 
-async def get_tasks_from_user(user_id: int,
-                              db: AsyncSession = Depends(get_async_db)):
+async def get_tasks_from_user(user_id: int, db: AsyncSession = Depends(get_async_db)):
     user = await db.get(User, user_id)
     await user_valid(user)
 
-    res_tasks = await db.execute(select(Task)
-                        .where(Task.user_id == user.id))
+    res_tasks = await db.execute(select(Task).where(Task.user_id == user.id))
     tasks = res_tasks.scalars().all()
 
     if not tasks:
-        return JSONResponse(status_code=200,
-                            detail={"message": "User list is empty"})
+        return JSONResponse(status_code=200, detail={"message": "User list is empty"})
     return tasks
 
 
@@ -65,15 +60,13 @@ async def get_task_from_user(
     await task_valid(task)
 
     if task.user_id != user.id:
-        raise HTTPException(status_code=403,
-                            detail="Task does not belong to this user")
+        raise HTTPException(status_code=403, detail="Task does not belong to this user")
 
     try:
         return task
     except Exception:
         raise HTTPException(
-            status_code=500,
-            detail="Произошла внутренняя ошибка сервера"
+            status_code=500, detail="Произошла внутренняя ошибка сервера"
         )
 
 
@@ -116,8 +109,7 @@ async def update_task_from_user(
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred "
-                   "when updating the object",
+            detail="An internal server error occurred " "when updating the object",
         )
 
 
@@ -144,6 +136,5 @@ async def delete_task_from_user(
     except:
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred "
-                   "when deleting the object",
+            detail="An internal server error occurred " "when deleting the object",
         )
