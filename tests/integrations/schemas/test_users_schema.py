@@ -1,14 +1,9 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.users import (
-    UserAuthSchema,
-    UserBaseSchema,
-    UserCreateSchema,
-    UserResponseSchema,
-    UserRoleEnum,
-    UserUpdateSchema,
-)
+from app.schemas.users import (UserAuthSchema, UserBaseSchema,
+                               UserCreateSchema, UserResponseSchema,
+                               UserRoleEnum, UserUpdateSchema)
 
 # pytest tests/integrations/schemas/test_users_schema.py
 
@@ -63,12 +58,16 @@ class TestUserSchemasErrors:
 
     def test_invalid_email_in_base_schema(self):
         with pytest.raises(ValidationError):
-            UserBaseSchema(name="Bad", email="not-an-email", role=UserRoleEnum.USER)
+            UserBaseSchema(name="Bad",
+                           email="not-an-email",
+                           role=UserRoleEnum.USER)
 
     def test_invalid_role_in_base_schema(self):
         with pytest.raises(ValidationError):
             UserBaseSchema(
-                name="RoleFail", email="rolefail@example.com", role="INVALID"
+                name="RoleFail",
+                email="rolefail@example.com",
+                role="INVALID"
             )
 
     def test_missing_password_in_create_schema(self):
@@ -81,7 +80,9 @@ class TestUserSchemasErrors:
 
     def test_missing_required_fields_in_response_schema(self):
         with pytest.raises(ValidationError):
-            UserResponseSchema(id=2, email="resp@example.com", is_active=True)
+            UserResponseSchema(id=2,
+                               email="resp@example.com",
+                               is_active=True)
 
     def test_invalid_email_in_auth_schema(self):
         with pytest.raises(ValidationError):

@@ -2,15 +2,11 @@ from fastapi import Depends, Form, HTTPException, Request, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.auth.auth import (
-    create_access_token,
-    create_refresh_token,
-    hash_password,
-    verify_password,
-    verify_refresh_token,
-)
+from app.api.auth.auth import (create_access_token, create_refresh_token,
+                               hash_password, verify_password,
+                               verify_refresh_token)
 from app.dependencies import get_async_db
-from app.models import User
+from app.models.users import User
 from app.schemas.users import UserAuthSchema, UserCreateSchema
 
 
@@ -37,15 +33,16 @@ async def register_user(
         await db.commit()
         await db.refresh(new_user)
         return new_user
-    except:
+    except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred " "when creating the object",
-        )
+            detail="An internal server error occurred " +
+                   "when creating the object")
 
 
-async def login_user(creds: UserAuthSchema, db: AsyncSession = Depends(get_async_db)):
+async def login_user(creds: UserAuthSchema,
+                     db: AsyncSession = Depends(get_async_db)):
 
     res = await db.execute(select(User).where(User.email == creds.email))
     user = res.scalars().first()
@@ -92,8 +89,12 @@ async def login_user_token(
     refresh_token = create_refresh_token({"sub": user.email})
 
     # cookies
-    response.set_cookie("access_token", access_token, httponly=True, max_age=900)
-    response.set_cookie("refresh_token", refresh_token, httponly=True, max_age=86400)
+    response.set_cookie("access_token", access_token,
+                        httponly=True,
+                        max_age=900)
+    response.set_cookie("refresh_token",
+                        refresh_token,
+                        httponly=True, max_age=86400)
 
     return {
         "email": user.email,
@@ -109,10 +110,12 @@ async def refresh_user_token(request: Request):
         email: str = payload.get("sub")
 
         if email is None:
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
+            raise HTTPException(status_code=401,
+                                detail="Invalid refresh token")
 
-    except:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    except Exception:
+        raise HTTPException(status_code=401,
+                            detail="Invalid refresh token")
 
     new_access_token = create_access_token({"sub": email})
     return {

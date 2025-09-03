@@ -3,7 +3,9 @@ import asyncio
 import uvicorn
 from fastapi import FastAPI
 
-from app.api.routers import router_auth, router_tasks, router_users
+from app.api.routers.tasks import router_tasks
+from app.api.routers.users import router_users
+from app.api.routers.auth import router_auth
 from app.core.database import Base, engine
 
 app = FastAPI()

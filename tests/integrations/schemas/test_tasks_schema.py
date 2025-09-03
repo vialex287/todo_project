@@ -3,13 +3,8 @@ from datetime import datetime, timedelta
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.tasks import (
-    TaskBaseSchema,
-    TaskCreateSchema,
-    TaskEnum,
-    TaskResponseSchema,
-    TaskUpdateSchema,
-)
+from app.schemas.tasks import (TaskBaseSchema, TaskCreateSchema, TaskEnum,
+                               TaskResponseSchema, TaskUpdateSchema)
 
 # pytest tests/integrations/schemas/test_tasks_schema.py
 

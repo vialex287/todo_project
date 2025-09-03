@@ -1,4 +1,4 @@
-import pytest
+# import pytest
 
 from app.models.users import User
 from app.schemas.users import UserRoleEnum
@@ -10,7 +10,9 @@ class TestUserModelValid:
 
     # default #
     def test_user_create_default(self):
-        user = User(name="Test User", email="test@example.com", password="password_123")
+        user = User(name="Test User",
+                    email="test@example.com",
+                    password="password_123")
 
         assert user.name == "Test User"
         assert user.email == "test@example.com"

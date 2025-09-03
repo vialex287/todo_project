@@ -4,22 +4,21 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_async_db
-from app.schemas.tasks import TaskCreateSchema, TaskResponseSchema, TaskUpdateSchema
-from app.services.tasks_service import (
-    create_task_user,
-    delete_task_from_user,
-    get_task_from_user,
-    get_tasks_from_user,
-    update_task_from_user,
-)
+from app.schemas.tasks import (TaskCreateSchema, TaskResponseSchema,
+                               TaskUpdateSchema)
+from app.services.tasks_service import (create_task_user,
+                                        delete_task_from_user,
+                                        get_task_from_user,
+                                        get_tasks_from_user,
+                                        update_task_from_user)
 
 router_tasks = APIRouter(prefix="/{user_id}/tasks", tags=["Tasks"])
 
 
 @router_tasks.post("/", response_model=TaskResponseSchema)
-async def create_task(
-    user_id: int, task_data: TaskCreateSchema, db: AsyncSession = Depends(get_async_db)
-):
+async def create_task(user_id: int,
+                      task_data: TaskCreateSchema,
+                      db: AsyncSession = Depends(get_async_db)):
     return await create_task_user(user_id, task_data, db)
 
 

@@ -4,10 +4,8 @@ import pytest
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app.models import Task
+from app.models.tasks import Task
 from app.schemas.tasks import TaskEnum
-
-# pytest tests/integrations/api/test_tasks_api.py
 
 
 # ------------------------------------------------------
@@ -17,7 +15,10 @@ from app.schemas.tasks import TaskEnum
 
 @pytest.mark.asyncio
 class TestTasksCreate:
-    async def test_create_task(self, test_client, test_db, user_factory):
+    async def test_create_task(self,
+                               test_client,
+                               test_db,
+                               user_factory):
         user = user_factory()
         test_db.add(user)
         await test_db.commit()
@@ -27,7 +28,8 @@ class TestTasksCreate:
             "title": "Test Task",
             "description": "This is a test task",
             "status": "In progress",
-            "deadline": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+            "deadline":
+                (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
         }
 
         resp = await test_client.post(f"/{user.id}/tasks/", json=payload)
@@ -40,7 +42,10 @@ class TestTasksCreate:
 
 @pytest.mark.asyncio
 class TestTasksRead:
-    async def test_get_tasks_empty(self, test_client, test_db, user_factory):
+    async def test_get_tasks_empty(self,
+                                   test_client,
+                                   test_db,
+                                   user_factory):
         user = user_factory()
         test_db.add(user)
         await test_db.commit()
@@ -98,7 +103,11 @@ class TestTasksRead:
 
 @pytest.mark.asyncio
 class TestTasksUpdate:
-    async def test_update_task(self, test_client, test_db, user_factory, task_factory):
+    async def test_update_task(self,
+                               test_client,
+                               test_db,
+                               user_factory,
+                               task_factory):
         user = user_factory()
         test_db.add(user)
         await test_db.commit()
@@ -112,11 +121,13 @@ class TestTasksUpdate:
         payload = {
             "title": "New Title",
             "description": "Updated description",
-            "deadline": (datetime.now(timezone.utc) + timedelta(days=3)).isoformat(),
+            "deadline":
+                (datetime.now(timezone.utc) + timedelta(days=3)).isoformat(),
             "is_completed": True,
         }
 
-        resp = await test_client.put(f"/{user.id}/tasks/{task.id}", json=payload)
+        resp = await test_client.put(f"/{user.id}/tasks/{task.id}",
+                                     json=payload)
         assert resp.status_code == 200
         data = resp.json()
         assert data["title"] == "New Title"
@@ -126,7 +137,11 @@ class TestTasksUpdate:
 
 @pytest.mark.asyncio
 class TestTasksDelete:
-    async def test_delete_task(self, test_client, test_db, user_factory, task_factory):
+    async def test_delete_task(self,
+                               test_client,
+                               test_db,
+                               user_factory,
+                               task_factory):
         user = user_factory(role="admin")
         test_db.add(user)
         await test_db.commit()
@@ -140,7 +155,8 @@ class TestTasksDelete:
         resp = await test_client.delete(f"/{user.id}/tasks/{task.id}")
         assert resp.status_code == 204
 
-        result = await test_db.execute(select(Task).filter(Task.id == task.id))
+        result = await test_db.execute(select(Task)
+                                       .filter(Task.id == task.id))
         deleted_task = result.scalar_one_or_none()
         assert deleted_task is None
 
@@ -164,7 +180,8 @@ class TestTasksErrors:
         payload = task_factory(user_id=user.id)
 
         monkeypatch.setattr(
-            payload, "update_status", lambda: (_ for _ in ()).throw(Exception("boom"))
+            payload, "update_status",
+            lambda: (_ for _ in ()).throw(Exception("boom"))
         )
 
         from app.schemas.tasks import TaskCreateSchema
@@ -178,9 +195,12 @@ class TestTasksErrors:
         )
         from unittest.mock import patch
 
-        with patch("app.models.Task.update_status", side_effect=Exception("boom")):
+        with patch("app.models.tasks.Task.update_status",
+                   side_effect=Exception("boom")):
             with pytest.raises(HTTPException) as exc:
-                await tasks_service.create_task_user(user.id, task_data, db=test_db)
+                await tasks_service.create_task_user(user.id,
+                                                     task_data,
+                                                     db=test_db)
 
         assert exc.value.status_code == 500
 
@@ -222,7 +242,10 @@ class TestTasksErrors:
         resp = await test_client.get(f"/{user2.id}/tasks/{task.id}")
         assert resp.status_code in (403, 404)
 
-    async def test_update_nonexistent_task(self, test_db, test_client, user_factory):
+    async def test_update_nonexistent_task(self,
+                                           test_db,
+                                           test_client,
+                                           user_factory):
         user = user_factory(role="admin")
         test_db.add(user)
         await test_db.commit()
@@ -258,7 +281,8 @@ class TestTasksErrors:
         new_data = TaskUpdateSchema(title="Updated Title")
 
         monkeypatch.setattr(
-            test_db, "commit", lambda: (_ for _ in ()).throw(Exception("boom"))
+            test_db, "commit",
+            lambda: (_ for _ in ()).throw(Exception("boom"))
         )
 
         with pytest.raises(HTTPException) as exc:
@@ -302,10 +326,13 @@ class TestTasksErrors:
         from app.services import tasks_service
 
         monkeypatch.setattr(
-            test_db, "commit", lambda: (_ for _ in ()).throw(Exception("boom"))
+            test_db, "commit",
+            lambda: (_ for _ in ()).throw(Exception("boom"))
         )
 
         with pytest.raises(HTTPException) as exc:
-            await tasks_service.delete_task_from_user(user.id, task.id, db=test_db)
+            await tasks_service.delete_task_from_user(user.id,
+                                                      task.id,
+                                                      db=test_db)
 
         assert exc.value.status_code == 500

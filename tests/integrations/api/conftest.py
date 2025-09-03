@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from app.models import Task
+from app.models.tasks import Task
 from app.schemas.tasks import TaskEnum
 
 
@@ -21,7 +21,8 @@ def task_factory():
             title=title,
             description=description,
             status=status,
-            deadline=deadline or (datetime.now(timezone.utc) + timedelta(days=1)),
+            deadline=deadline or (datetime.now(timezone.utc) +
+                                  timedelta(days=1)),
             is_completed=is_completed,
         )
 

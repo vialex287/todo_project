@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.api.auth.auth import get_current_user
 from app.core.database import Base
-from app.models import User
+from app.models.users import User
 from main import app
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"

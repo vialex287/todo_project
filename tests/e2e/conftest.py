@@ -132,7 +132,8 @@ async def registered_admin(client):
 @pytest.fixture
 async def user_token(client, registered_user):
     resp = await client.post(
-        "/auth/login", json={"email": registered_user["email"], "password": "secret123"}
+        "/auth/login",
+        json={"email": registered_user["email"], "password": "secret123"}
     )
     return resp.json()["access_token"]
 
@@ -140,6 +141,7 @@ async def user_token(client, registered_user):
 @pytest.fixture
 async def admin_token(client, registered_admin):
     resp = await client.post(
-        "/auth/login", json={"email": registered_admin["email"], "password": "admin123"}
+        "/auth/login",
+        json={"email": registered_admin["email"], "password": "admin123"}
     )
     return resp.json()["access_token"]

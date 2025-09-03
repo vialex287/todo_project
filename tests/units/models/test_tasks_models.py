@@ -11,7 +11,9 @@ from app.schemas.tasks import TaskEnum
 
 class TestTaskModel:
     def test_task_creation_basic(self):
-        task = Task(title="Test Task", description="Test description", user_id=1)
+        task = Task(title="Test Task",
+                    description="Test description",
+                    user_id=1)
 
         assert task.title == "Test Task"
         assert task.description == "Test description"
@@ -54,14 +56,16 @@ class TestTaskUpdateStatus:
 
     async def test_task_update_status_expired(self):
         task = Task(
-            is_completed=False, deadline=datetime.now(timezone.utc) - timedelta(days=1)
+            is_completed=False,
+            deadline=datetime.now(timezone.utc) - timedelta(days=1)
         )
         await task.update_status()
         assert task.status == TaskEnum.EXPIRED
 
     async def test_task_update_status_in_progress(self):
         task = Task(
-            is_completed=False, deadline=datetime.now(timezone.utc) + timedelta(days=1)
+            is_completed=False,
+            deadline=datetime.now(timezone.utc) + timedelta(days=1)
         )
         await task.update_status()
         assert task.status == TaskEnum.IN_PROGRESS
