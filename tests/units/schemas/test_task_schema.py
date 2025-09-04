@@ -3,8 +3,12 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.tasks import (TaskCreateSchema, TaskEnum, TaskResponseSchema,
-                               TaskUpdateSchema)
+from app.schemas.tasks import (
+    TaskCreateSchema,
+    TaskEnum,
+    TaskResponseSchema,
+    TaskUpdateSchema,
+)
 
 # pytest tests\units\schemas\test_task_schema.py -v
 
@@ -42,8 +46,7 @@ class TestTaskCreateSchema:
 
     def test_missing_title(self):
         with pytest.raises(ValidationError):
-            TaskCreateSchema(description="Test",
-                             deadline=datetime(2025, 12, 31))
+            TaskCreateSchema(description="Test", deadline=datetime(2025, 12, 31))
 
     def test_missing_deadline(self):
         with pytest.raises(ValidationError):
@@ -150,8 +153,7 @@ class TestTaskResponseSchema:
             "title": "Test Task",
             "description": "Test description",
             "status": TaskEnum.DONE,
-            "deadline": datetime(2025, 12,
-                                 31, 23, 59),
+            "deadline": datetime(2025, 12, 31, 23, 59),
             "is_completed": True,
         }
 
@@ -161,8 +163,7 @@ class TestTaskResponseSchema:
         assert schema.title == "Test Task"
         assert schema.description == "Test description"
         assert schema.status == TaskEnum.DONE
-        assert schema.deadline == datetime(2025, 12,
-                                           31, 23, 59)
+        assert schema.deadline == datetime(2025, 12, 31, 23, 59)
         assert schema.is_completed is True
 
     def test_default_values(self):
@@ -214,28 +215,18 @@ class TestTaskResponseSchema:
     def test_missing_user_id(self):
         with pytest.raises(ValidationError):
             TaskResponseSchema(
-                id=1,
-                title="Test",
-                description="Test",
-
-                deadline=datetime(2024, 12, 31)
+                id=1, title="Test", description="Test", deadline=datetime(2024, 12, 31)
             )
 
     def test_missing_title(self):
         with pytest.raises(ValidationError):
             TaskResponseSchema(
-                id=1,
-                user_id=123,
-                description="Test",
-                deadline=datetime(2024, 12, 31)
+                id=1, user_id=123, description="Test", deadline=datetime(2024, 12, 31)
             )
 
     def test_missing_deadline(self):
         with pytest.raises(ValidationError):
-            TaskResponseSchema(id=1,
-                               user_id=123,
-                               title="Test",
-                               description="Test")
+            TaskResponseSchema(id=1, user_id=123, title="Test", description="Test")
 
     def test_invalid_status(self):
         data = {

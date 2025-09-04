@@ -12,6 +12,7 @@ from app.schemas.users import UserRoleEnum
 # SUCCESS
 # ------------------------------------------------------
 
+
 class TestUserModelSuccess:
 
     @pytest.mark.asyncio
@@ -61,9 +62,7 @@ class TestUserModelSuccess:
         assert deleted is None
 
     @pytest.mark.asyncio
-    async def test_user_with_tasks_relationship(self,
-                                                test_db,
-                                                user_factory):
+    async def test_user_with_tasks_relationship(self, test_db, user_factory):
         user = user_factory(email="withtasks@example.com")
         test_db.add(user)
         await test_db.commit()
@@ -76,8 +75,7 @@ class TestUserModelSuccess:
         await test_db.commit()
 
         result = await test_db.execute(
-            select(User).options(selectinload(User.tasks))
-                        .where(User.id == user.id)
+            select(User).options(selectinload(User.tasks)).where(User.id == user.id)
         )
         user_with_tasks = result.scalar_one()
 
@@ -109,9 +107,7 @@ class TestUserModelErrors:
 
     @pytest.mark.asyncio
     async def test_null_password_not_allowed(self, test_db):
-        user = User(name="NoPass",
-                    email="nopass@example.com",
-                    password=None)
+        user = User(name="NoPass", email="nopass@example.com", password=None)
         test_db.add(user)
 
         with pytest.raises(IntegrityError):

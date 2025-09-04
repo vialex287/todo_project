@@ -36,10 +36,7 @@ class TestAuthRegisterCrud:
         from app.services import auth_service
 
         user_data = UserCreateSchema(
-            name="Edge",
-            email="edge@example.com",
-            password="password123",
-            role="user"
+            name="Edge", email="edge@example.com", password="password123", role="user"
         )
 
         class FakeResult:
@@ -96,8 +93,7 @@ class TestAuthRegisterErrors:
         )
 
         monkeypatch.setattr(
-            test_db, "add",
-            AsyncMock(side_effect=Exception("DB error"))
+            test_db, "add", AsyncMock(side_effect=Exception("DB error"))
         )
         monkeypatch.setattr(test_db, "commit", AsyncMock())
 
@@ -144,15 +140,13 @@ class TestAuthLoginCrud:
     @pytest.mark.asyncio
     async def test_login_success(self, test_client, user_factory, test_db):
         user = user_factory(
-            email="login@example.com",
-            password=auth.hash_password("secret")
+            email="login@example.com", password=auth.hash_password("secret")
         )
         test_db.add(user)
         await test_db.commit()
 
         resp = await test_client.post(
-            "/auth/login",
-            json={"email": "login@example.com", "password": "secret"}
+            "/auth/login", json={"email": "login@example.com", "password": "secret"}
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -164,36 +158,27 @@ class TestAuthLoginErrors:
     @pytest.mark.asyncio
     async def test_login_invalid_email(self, test_client):
         resp = await test_client.post(
-            "/auth/login",
-            json={"email": "nope@example.com", "password": "secret"}
+            "/auth/login", json={"email": "nope@example.com", "password": "secret"}
         )
         assert resp.status_code == 401
         assert resp.json()["detail"] == "User is not found"
 
     @pytest.mark.asyncio
-    async def test_login_invalid_password(self,
-                                          test_client,
-                                          user_factory,
-                                          test_db):
+    async def test_login_invalid_password(self, test_client, user_factory, test_db):
         user = user_factory(
-            email="wrongpass@example.com",
-            password=auth.hash_password("right")
+            email="wrongpass@example.com", password=auth.hash_password("right")
         )
         test_db.add(user)
         await test_db.commit()
 
         resp = await test_client.post(
-            "/auth/login",
-            json={"email": "wrongpass@example.com", "password": "bad"}
+            "/auth/login", json={"email": "wrongpass@example.com", "password": "bad"}
         )
         assert resp.status_code == 401
         assert resp.json()["detail"] == "Invalid password"
 
     @pytest.mark.asyncio
-    async def test_login_blocked_user(self,
-                                      test_client,
-                                      user_factory,
-                                      test_db):
+    async def test_login_blocked_user(self, test_client, user_factory, test_db):
         user = user_factory(
             email="blocked@example.com",
             password=auth.hash_password("pw"),
@@ -203,8 +188,7 @@ class TestAuthLoginErrors:
         await test_db.commit()
 
         resp = await test_client.post(
-            "/auth/login",
-            json={"email": "blocked@example.com", "password": "pw"}
+            "/auth/login", json={"email": "blocked@example.com", "password": "pw"}
         )
 
         await test_db.refresh(user)
@@ -220,12 +204,8 @@ class TestAuthLoginErrors:
 
 class TestAuthLoginTokenCrud:
     @pytest.mark.asyncio
-    async def test_login_token_success(self,
-                                       test_client,
-                                       user_factory,
-                                       test_db):
-        user = user_factory(email="form@example.com",
-                            password=auth.hash_password("pw"))
+    async def test_login_token_success(self, test_client, user_factory, test_db):
+        user = user_factory(email="form@example.com", password=auth.hash_password("pw"))
         test_db.add(user)
         await test_db.commit()
 
@@ -251,10 +231,7 @@ class TestAuthLoginTokenErrors:
         assert resp.json()["detail"] == "User is not found"
 
     @pytest.mark.asyncio
-    async def test_login_token_blocked_user(self,
-                                            test_client,
-                                            user_factory,
-                                            test_db):
+    async def test_login_token_blocked_user(self, test_client, user_factory, test_db):
         user = user_factory(
             email="blockedtoken@example.com",
             password=auth.hash_password("pw"),
@@ -277,8 +254,7 @@ class TestAuthLoginTokenErrors:
         self, test_client, user_factory, test_db
     ):
         user = user_factory(
-            email="wrongpwtoken@example.com",
-            password=auth.hash_password("correct")
+            email="wrongpwtoken@example.com", password=auth.hash_password("correct")
         )
         test_db.add(user)
         await test_db.commit()
@@ -300,10 +276,7 @@ class TestAuthLoginTokenErrors:
 
 class TestAuthRefreshCrud:
     @pytest.mark.asyncio
-    async def test_refresh_success(self,
-                                   test_client,
-                                   user_factory,
-                                   test_db):
+    async def test_refresh_success(self, test_client, user_factory, test_db):
         user = user_factory(
             email="refresh@example.com", password=auth.hash_password("pw")
         )
@@ -321,8 +294,7 @@ class TestAuthRefreshCrud:
 
     @pytest.mark.asyncio
     async def test_refresh_token_missing_sub(self, test_client):
-        with patch("app.services.auth_service.verify_refresh_token",
-                   return_value={}):
+        with patch("app.services.auth_service.verify_refresh_token", return_value={}):
             resp = await test_client.post(
                 "/auth/refresh", cookies={"refresh_token": "dummy.token"}
             )

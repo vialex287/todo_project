@@ -1,9 +1,13 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.users import (UserAuthSchema, UserCreateSchema,
-                               UserResponseSchema, UserRoleEnum,
-                               UserUpdateSchema)
+from app.schemas.users import (
+    UserAuthSchema,
+    UserCreateSchema,
+    UserResponseSchema,
+    UserRoleEnum,
+    UserUpdateSchema,
+)
 
 # pytest tests\units\schemas\test_user_schema.py -v
 
@@ -159,10 +163,7 @@ class TestUserResponseSchema:
             UserResponseSchema(**data)
 
     def test_user_response_invalid_email(self):
-        data = {"id": 1,
-                "name": "Anna",
-                "email": "invalid-email",
-                "is_active": True}
+        data = {"id": 1, "name": "Anna", "email": "invalid-email", "is_active": True}
         with pytest.raises(ValidationError):
             UserResponseSchema(**data)
 

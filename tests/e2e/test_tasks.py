@@ -11,10 +11,7 @@ from app.schemas.tasks import TaskEnum
 @pytest.mark.e2e
 class TestTasksE2E:
 
-    async def test_create_task(self,
-                               client,
-                               registered_user,
-                               user_token):
+    async def test_create_task(self, client, registered_user, user_token):
         response = await client.post(
             f"/{registered_user['id']}/tasks/",
             headers={"Authorization": f"Bearer {user_token}"},
@@ -35,10 +32,7 @@ class TestTasksE2E:
         assert data["is_completed"] is False
         self.task_id = data["id"]
 
-    async def test_get_tasks_from_user(self,
-                                       client,
-                                       registered_user,
-                                       user_token):
+    async def test_get_tasks_from_user(self, client, registered_user, user_token):
         await client.post(
             f"/{registered_user['id']}/tasks/",
             headers={"Authorization": f"Bearer {user_token}"},
@@ -61,10 +55,7 @@ class TestTasksE2E:
         assert isinstance(data, list)
         assert len(data) > 0
 
-    async def test_get_task_from_user(self,
-                                      client,
-                                      registered_user,
-                                      user_token):
+    async def test_get_task_from_user(self, client, registered_user, user_token):
         create_resp = await client.post(
             f"/{registered_user['id']}/tasks/",
             headers={"Authorization": f"Bearer {user_token}"},
@@ -89,10 +80,7 @@ class TestTasksE2E:
         assert data["id"] == task_id
         assert data["title"] == "Get Task"
 
-    async def test_update_task_from_user(self,
-                                         client,
-                                         registered_user,
-                                         user_token):
+    async def test_update_task_from_user(self, client, registered_user, user_token):
         create_resp = await client.post(
             f"/{registered_user['id']}/tasks/",
             headers={"Authorization": f"Bearer {user_token}"},
@@ -128,10 +116,7 @@ class TestTasksE2E:
         assert data["status"] == TaskEnum.DONE.value
         assert data["is_completed"] is True
 
-    async def test_delete_task_from_user(self,
-                                         client,
-                                         registered_user,
-                                         user_token):
+    async def test_delete_task_from_user(self, client, registered_user, user_token):
         create_resp = await client.post(
             f"/{registered_user['id']}/tasks/",
             headers={"Authorization": f"Bearer {user_token}"},

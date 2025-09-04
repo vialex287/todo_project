@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import (Boolean, Column, DateTime, Enum, ForeignKey, Integer,
-                        String)
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -16,13 +15,10 @@ class Task(Base):
     title = Column(String(50))
     description = Column(String(256))
     status = Column(
-        Enum(TaskEnum),
-        default=TaskEnum.IN_PROGRESS,
-        nullable=False, index=True
+        Enum(TaskEnum), default=TaskEnum.IN_PROGRESS, nullable=False, index=True
     )
     deadline = Column(
-        DateTime,
-        default=(datetime.now(timezone.utc) + timedelta(days=1)), index=True
+        DateTime, default=(datetime.now(timezone.utc) + timedelta(days=1)), index=True
     )
     is_completed = Column(Boolean, default=False, index=True)
 
