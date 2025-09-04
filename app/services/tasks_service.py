@@ -4,8 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_async_db, task_valid, user_valid
-from app.models.users import User
 from app.models.tasks import Task
+from app.models.users import User
 from app.schemas.tasks import TaskCreateSchema, TaskUpdateSchema
 
 

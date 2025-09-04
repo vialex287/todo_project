@@ -7,7 +7,6 @@ from sqlalchemy import select
 from app.models.tasks import Task
 from app.schemas.tasks import TaskEnum
 
-
 # ------------------------------------------------------
 # CRUD
 # ------------------------------------------------------
