@@ -22,7 +22,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env.example"
 
-
     @property
     def DATABASE_URL(self):
         if self.DB_TYPE.startswith("sqlite"):
