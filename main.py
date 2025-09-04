@@ -3,20 +3,18 @@ import asyncio
 import uvicorn
 from fastapi import FastAPI
 
+from app.api.routers.auth import router_auth
 from app.api.routers.tasks import router_tasks
 from app.api.routers.users import router_users
-from app.api.routers.auth import router_auth
 from app.core.database import Base, engine
 
 app = FastAPI()
 
 
-# create tables
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-    print("Таблицы успешно созданы в базе данных!")
 
 
 @app.on_event("startup")
