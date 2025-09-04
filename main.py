@@ -1,5 +1,3 @@
-import asyncio
-
 import uvicorn
 from fastapi import FastAPI
 
@@ -22,7 +20,6 @@ async def startup_event():
     await create_tables()
 
 
-# view headers
 app.include_router(router_users)
 app.include_router(router_tasks)
 app.include_router(router_auth)
