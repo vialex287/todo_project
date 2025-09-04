@@ -1,5 +1,7 @@
 import pytest
+
 from app.core.config import Settings
+
 
 @pytest.fixture
 def test_settings():

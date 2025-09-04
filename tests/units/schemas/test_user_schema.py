@@ -1,7 +1,13 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.users import UserCreateSchema, UserUpdateSchema, UserResponseSchema, UserAuthSchema, UserRoleEnum
+from app.schemas.users import (
+    UserAuthSchema,
+    UserCreateSchema,
+    UserResponseSchema,
+    UserRoleEnum,
+    UserUpdateSchema,
+)
 
 # pytest tests\units\schemas\test_user_schema.py -v
 
@@ -56,11 +62,11 @@ class TestUserCreateSchema:
             "email": "bob@example.com",
             "password": "secure123",
             "id": 999,
-            "field": "value"
+            "field": "value",
         }
         schema = UserCreateSchema(**data)
-        assert not hasattr(schema, 'id')
-        assert not hasattr(schema, 'field')
+        assert not hasattr(schema, "id")
+        assert not hasattr(schema, "field")
 
     # errors #
 
@@ -107,7 +113,7 @@ class TestUserUpdateSchema:
 
     def test_invalid_email(self):
         with pytest.raises(ValidationError):
-            UserUpdateSchema(email="not-an-email") # ✅
+            UserUpdateSchema(email="not-an-email")  # ✅
 
 
 class TestUserResponseSchema:
@@ -134,7 +140,7 @@ class TestUserResponseSchema:
             "name": "Anna",
             "email": "anna@example.com",
             "role": UserRoleEnum.USER,
-            "is_active": True
+            "is_active": True,
         }
 
         schema = UserResponseSchema(**data)
@@ -157,12 +163,7 @@ class TestUserResponseSchema:
             UserResponseSchema(**data)
 
     def test_user_response_invalid_email(self):
-        data = {
-            "id": 1,
-            "name": "Anna",
-            "email": "invalid-email",
-            "is_active": True
-        }
+        data = {"id": 1, "name": "Anna", "email": "invalid-email", "is_active": True}
         with pytest.raises(ValidationError):
             UserResponseSchema(**data)
 

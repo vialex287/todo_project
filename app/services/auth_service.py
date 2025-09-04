@@ -1,14 +1,22 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends, Form, HTTPException, Request, Response
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, HTTPException, Form, Response, Request
-from app.models import User
-from app.schemas.users import UserCreateSchema, UserAuthSchema
-from app.api.auth.auth import verify_password, hash_password, create_access_token, create_refresh_token, verify_refresh_token
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.auth.auth import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+    verify_refresh_token,
+)
 from app.dependencies import get_async_db
+from app.models.users import User
+from app.schemas.users import UserAuthSchema, UserCreateSchema
 
 
-async def register_user(user_data: UserCreateSchema,
-                        db: AsyncSession = Depends(get_async_db)) -> User:
+async def register_user(
+    user_data: UserCreateSchema, db: AsyncSession = Depends(get_async_db)
+) -> User:
 
     hashed = hash_password(user_data.password)
 
@@ -21,7 +29,7 @@ async def register_user(user_data: UserCreateSchema,
         email=user_data.email,
         password=hashed,
         is_active=True,
-        role=user_data.role
+        role=user_data.role,
     )
 
     try:
@@ -29,16 +37,15 @@ async def register_user(user_data: UserCreateSchema,
         await db.commit()
         await db.refresh(new_user)
         return new_user
-    except:
+    except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when creating the object"
+            detail="An internal server error occurred " + "when creating the object",
         )
 
 
-async def login_user(creds: UserAuthSchema,
-                     db: AsyncSession = Depends(get_async_db)):
+async def login_user(creds: UserAuthSchema, db: AsyncSession = Depends(get_async_db)):
 
     res = await db.execute(select(User).where(User.email == creds.email))
     user = res.scalars().first()
@@ -55,18 +62,19 @@ async def login_user(creds: UserAuthSchema,
     access_token = create_access_token({"sub": user.email})
     refresh_token = create_refresh_token({"sub": user.email})
 
-
     return {
-            "email": user.email,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        }
+        "email": user.email,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
 
 
-async def login_user_token(response: Response,
-                           username: str = Form(...),
-                           password: str = Form(...),
-                           db: AsyncSession = Depends(get_async_db)):
+async def login_user_token(
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: AsyncSession = Depends(get_async_db),
+):
     res = await db.execute(select(User).where(User.email == username))
     user = res.scalars().first()
 
@@ -91,7 +99,7 @@ async def login_user_token(response: Response,
         "email": user.email,
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
     }
 
 
@@ -103,7 +111,7 @@ async def refresh_user_token(request: Request):
         if email is None:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    except:
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     new_access_token = create_access_token({"sub": email})
@@ -113,4 +121,3 @@ async def refresh_user_token(request: Request):
         "access_token": new_access_token,
         "token_type": "bearer",
     }
-

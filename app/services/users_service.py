@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.responses import JSONResponse, Response
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_async_db, user_valid
-from app.schemas.users import UserUpdateSchema
-from app.models import User
 from app.api.auth.auth import get_current_user
+from app.dependencies import get_async_db, user_valid
+from app.models.users import User
+from app.schemas.users import UserUpdateSchema
 
 
-# показать всех пользователей
 async def get_users_(
-        db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="You are not admin")
@@ -21,17 +20,14 @@ async def get_users_(
     users = result.scalars().all()
 
     if not users:
-        return JSONResponse(
-            status_code=200,
-            content={"message": "User list is empty"}
-        )
+        return JSONResponse(status_code=200, content={"message": "User list is empty"})
     return users
 
 
-# показать конкретного пользователя
-async def get_user_(user_id: int,
-                   db: AsyncSession = Depends(get_async_db),
-                   current_user: User = Depends(get_current_user)
+async def get_user_(
+    user_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
@@ -44,19 +40,18 @@ async def get_user_(user_id: int,
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when getting the object"
+            detail="An internal server error occurred " "when getting the object",
         )
 
 
 async def update_user_(
-        user_id: int,
-        new_data: UserUpdateSchema,
-        db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_current_user)
+    user_id: int,
+    new_data: UserUpdateSchema,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
-
 
     if current_user.id != user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="You are not admin")
@@ -79,17 +74,18 @@ async def update_user_(
         await db.commit()
         await db.refresh(user)
         return user
-    except:
+    except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when updating the object")
+            detail="An internal server error occurred " "when updating the object",
+        )
 
 
 async def delete_user_(
-        user_id: int,
-        db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_current_user)
+    user_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
@@ -101,9 +97,9 @@ async def delete_user_(
         await db.delete(user)
         await db.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
-    except:
+    except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when deleting an object"
+            detail="An internal server error occurred " "when deleting an object",
         )

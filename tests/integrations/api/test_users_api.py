@@ -1,11 +1,12 @@
 import pytest
-from app.models import User
 
-# pytest tests/integrations/api/test_users_api.py
+from app.models.users import User
 
 # ------------------------------------------------------
 # CRUD
 # ------------------------------------------------------
+
+
 @pytest.mark.asyncio
 class TestUsersCRUD:
 
@@ -48,7 +49,11 @@ class TestUsersCRUD:
 
         test_client.set_current_user(admin)
 
-        payload = {"name": "New Name", "email": "new@example.com", "password": "newpass123"}
+        payload = {
+            "name": "New Name",
+            "email": "new@example.com",
+            "password": "newpass123",
+        }
         resp = await test_client.put(f"/users/{user.id}", json=payload)
         assert resp.status_code == 200
         data = resp.json()
@@ -89,8 +94,9 @@ class TestUsersAuth:
         resp = await test_client.get("/users/")
         assert resp.status_code == 403
 
-
-    async def test_user_cannot_delete_other_user(self, test_client, test_db, user_factory):
+    async def test_user_cannot_delete_other_user(
+        self, test_client, test_db, user_factory
+    ):
         user1 = user_factory(role="user")
         user2 = user_factory(role="user")
         test_db.add_all([user1, user2])
@@ -102,7 +108,6 @@ class TestUsersAuth:
 
         resp = await test_client.delete(f"/users/{user2.id}")
         assert resp.status_code == 403
-
 
     async def test_user_can_update_self(self, test_client, test_db, user_factory):
         user = user_factory(role="user", email="me@example.com", name="Me")
@@ -197,7 +202,6 @@ class TestUsersErrors:
 
         test_client.set_current_user(admin)
 
-        payload = {"name": "BadEmail", "email": "invalid-email"}  # ❌ без @
+        payload = {"name": "BadEmail", "email": "invalid-email"}
         resp = await test_client.put(f"/users/{user.id}", json=payload)
         assert resp.status_code == 422
-

@@ -1,5 +1,4 @@
-import pytest
-from pydantic import ValidationError
+# import pytest
 
 from app.models.users import User
 from app.schemas.users import UserRoleEnum
@@ -11,11 +10,7 @@ class TestUserModelValid:
 
     # default #
     def test_user_create_default(self):
-        user = User(
-            name="Test User",
-            email="test@example.com",
-            password="password_123"
-        )
+        user = User(name="Test User", email="test@example.com", password="password_123")
 
         assert user.name == "Test User"
         assert user.email == "test@example.com"
@@ -25,12 +20,12 @@ class TestUserModelValid:
         assert user.tasks == []
 
     def test_user_columns_exist(self):
-        assert hasattr(User, 'id')
-        assert hasattr(User, 'name')
-        assert hasattr(User, 'email')
-        assert hasattr(User, 'password')
-        assert hasattr(User, 'role')
-        assert hasattr(User, 'is_active')
+        assert hasattr(User, "id")
+        assert hasattr(User, "name")
+        assert hasattr(User, "email")
+        assert hasattr(User, "password")
+        assert hasattr(User, "role")
+        assert hasattr(User, "is_active")
 
     # email #
     def test_user_email_unique_constraint(self):
@@ -45,7 +40,7 @@ class TestUserModelValid:
             name="Admin User",
             email="admin@example.com",
             password="hashed_password_123",
-            role=UserRoleEnum.ADMIN
+            role=UserRoleEnum.ADMIN,
         )
 
         assert user.role == UserRoleEnum.ADMIN
@@ -59,5 +54,5 @@ class TestUserModelValid:
 
     # relationship tasks
     def test_user_relationship_tasks(self):
-        assert hasattr(User, 'tasks')
+        assert hasattr(User, "tasks")
         assert User.tasks.property.uselist is True

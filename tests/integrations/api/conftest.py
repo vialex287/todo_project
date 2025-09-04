@@ -1,7 +1,8 @@
-import pytest
 from datetime import datetime, timedelta, timezone
 
-from app.models import Task
+import pytest
+
+from app.models.tasks import Task
 from app.schemas.tasks import TaskEnum
 
 
@@ -23,7 +24,5 @@ def task_factory():
             deadline=deadline or (datetime.now(timezone.utc) + timedelta(days=1)),
             is_completed=is_completed,
         )
+
     return _create_task
-
-
-

@@ -1,17 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_async_db, user_valid, task_valid
+from app.dependencies import get_async_db, task_valid, user_valid
+from app.models.tasks import Task
+from app.models.users import User
 from app.schemas.tasks import TaskCreateSchema, TaskUpdateSchema
-from app.models import Task, User
+
 
 async def create_task_user(
-        user_id: int,
-        task_data: TaskCreateSchema,
-        db: AsyncSession = Depends(get_async_db)
-    ):
+    user_id: int, task_data: TaskCreateSchema, db: AsyncSession = Depends(get_async_db)
+):
     user = await db.get(User, user_id)
     await user_valid(user)
 
@@ -21,7 +21,7 @@ async def create_task_user(
         description=task_data.description,
         status=task_data.status.value,
         deadline=task_data.deadline,
-        is_completed=False
+        is_completed=False,
     )
 
     try:
@@ -30,18 +30,15 @@ async def create_task_user(
         await db.commit()
         await db.refresh(new_task)
         return new_task
-    except:
+    except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when creating the object"
+            detail="An internal server error occurred " + "when creating the object",
         )
 
 
-async def get_tasks_from_user(
-        user_id: int,
-        db: AsyncSession = Depends(get_async_db)
-):
+async def get_tasks_from_user(user_id: int, db: AsyncSession = Depends(get_async_db)):
     user = await db.get(User, user_id)
     await user_valid(user)
 
@@ -49,16 +46,13 @@ async def get_tasks_from_user(
     tasks = res_tasks.scalars().all()
 
     if not tasks:
-        return JSONResponse(
-            status_code=200,
-            content={"message": "User list is empty"}
-        )
+        return JSONResponse(status_code=200, content={"message": "User list is empty"})
     return tasks
 
 
-async def get_task_from_user(user_id: int,
-                   task_id: int,
-                   db: AsyncSession = Depends(get_async_db)):
+async def get_task_from_user(
+    user_id: int, task_id: int, db: AsyncSession = Depends(get_async_db)
+):
 
     user = await db.get(User, user_id)
     await user_valid(user)
@@ -73,16 +67,15 @@ async def get_task_from_user(user_id: int,
         return task
     except Exception:
         raise HTTPException(
-            status_code=500,
-            detail="Произошла внутренняя ошибка сервера"
+            status_code=500, detail="Произошла внутренняя ошибка сервера"
         )
 
 
 async def update_task_from_user(
-        user_id: int,
-        task_id: int,
-        new_data: TaskUpdateSchema,
-        db: AsyncSession = Depends(get_async_db)
+    user_id: int,
+    task_id: int,
+    new_data: TaskUpdateSchema,
+    db: AsyncSession = Depends(get_async_db),
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
@@ -113,18 +106,16 @@ async def update_task_from_user(
         await db.commit()
         await db.refresh(task)
         return task
-    except:
+    except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when updating the object"
+            detail="An internal server error occurred " + "when updating the object",
         )
 
 
 async def delete_task_from_user(
-        user_id: int,
-        task_id: int,
-        db: AsyncSession = Depends(get_async_db)
+    user_id: int, task_id: int, db: AsyncSession = Depends(get_async_db)
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
@@ -143,8 +134,8 @@ async def delete_task_from_user(
         await db.commit()
         await db.flush()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
-    except:
+    except Exception:
         raise HTTPException(
             status_code=500,
-            detail="An internal server error occurred when deleting the object"
+            detail="An internal server error occurred " + "when deleting the object",
         )

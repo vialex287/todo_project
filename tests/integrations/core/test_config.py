@@ -1,14 +1,12 @@
 import pytest
 from pydantic_core import ValidationError
-from app.core.config import Settings
 
-# pytest tests/integrations/core/test_config.py
+from app.core.config import Settings
 
 
 class TestConfig:
     def test_settings_fields(self, test_settings):
         s = test_settings
-        # Проверяем все поля
         assert isinstance(s.DB_TYPE, str)
         assert isinstance(s.DB_USER, str)
         assert isinstance(s.DB_PASSWORD, str)
@@ -23,11 +21,13 @@ class TestConfig:
     def test_database_url_property(self, test_settings):
         s = test_settings
         url = s.DATABASE_URL
-        assert s.DB_USER in url
-        assert s.DB_PASSWORD in url
-        assert s.DB_HOST in url
-        assert s.DB_NAME in url
         assert url.startswith(s.DB_TYPE)
+
+        if not s.DB_TYPE.startswith("sqlite"):
+            assert s.DB_USER in url
+            assert s.DB_PASSWORD in url
+            assert s.DB_HOST in url
+        assert s.DB_NAME in url
 
     def test_wrong_port_type(self, monkeypatch):
         monkeypatch.setenv("DB_PORT", "not_a_number")

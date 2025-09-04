@@ -1,12 +1,13 @@
 import pytest
 from sqlalchemy import text
+from sqlalchemy.exc import ArgumentError, UnboundExecutionError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import ArgumentError, UnboundExecutionError
 
-from app.core.database import Base, engine, SessionLocal
+from app.core.database import Base, SessionLocal, engine
 
 # pytest tests/integrations/core/test_database.py
+
 
 class TestDatabaseSuccess:
     def test_engine_instance(self):
@@ -25,8 +26,10 @@ class TestDatabaseErrors:
     def test_invalid_database_url(self, monkeypatch):
         monkeypatch.setenv("DB_TYPE", "invalid_driver")
         from app.core.config import Settings
+
         s = Settings(_env_file=".env.example")
         from sqlalchemy.ext.asyncio import create_async_engine
+
         with pytest.raises(ArgumentError):
             create_async_engine(s.DATABASE_URL)
 
