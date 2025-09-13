@@ -7,7 +7,6 @@ from app.api.routers.users import router_users
 from app.core.database import Base, engine
 from app.dependencies import wait_for_db
 
-
 app = FastAPI()
 
 
