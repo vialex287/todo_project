@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ToDoProject
+      MYSQL_USER: adminToDo
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    secrets:
+      - db_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      retries: 10
+      timeout: 3s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USER: adminToDo
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_HOST: db
+      DB_NAME: ToDoProject
+    secrets:
+      - db_password
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      DB_USER: adminToDo
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_HOST: db
+      DB_NAME: ToDoProject
+    secrets:
+      - db_password
+    depends_on:
+      - db
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+volumes:
+  db_data:
+    driver: local
