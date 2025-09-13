@@ -1,11 +1,11 @@
-import re
 import asyncio
+import re
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import engine
 from app.core.config import settings
+from app.core.database import engine
 
 
 async def get_async_db():
@@ -38,6 +38,7 @@ def validate_email(email: str | None) -> str | None:
 
 async def wait_for_db():
     import aiomysql
+
     for _ in range(5):
         try:
             conn = await aiomysql.connect(

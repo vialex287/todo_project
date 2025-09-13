@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
@@ -34,6 +35,7 @@ class Settings(BaseSettings):
                 f"?charset=utf8mb4"
             )
 
+
 settings = Settings()
 
 
@@ -44,6 +46,7 @@ if Path("/.dockerenv").exists():
 
 def get_secret(name, default=None):
     import os
+
     value = os.getenv(name)
     if value:
         return value
@@ -53,6 +56,7 @@ def get_secret(name, default=None):
         return Path(file_path).read_text().strip()
 
     return default
+
 
 DB_USER = get_secret("DB_USER", "adminToDo")
 DB_PASSWORD = get_secret("DB_PASSWORD", "")

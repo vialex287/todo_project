@@ -28,4 +28,3 @@ __pycache__/
 *.tmp
 *.temp
 /.coverage
-/secrets/
