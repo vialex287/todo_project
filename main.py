@@ -5,6 +5,7 @@ from app.api.routers.auth import router_auth
 from app.api.routers.tasks import router_tasks
 from app.api.routers.users import router_users
 from app.core.database import Base, engine
+from app.dependencies import wait_for_db
 
 app = FastAPI()
 
@@ -17,6 +18,7 @@ async def create_tables():
 
 @app.on_event("startup")
 async def startup_event():
+    await wait_for_db()
     await create_tables()
 
 

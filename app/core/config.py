@@ -1,3 +1,4 @@
+from pathlib import Path
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
@@ -33,5 +34,27 @@ class Settings(BaseSettings):
                 f"?charset=utf8mb4"
             )
 
-
 settings = Settings()
+
+
+# config for DockerSecret
+if Path("/.dockerenv").exists():
+    settings.DB_HOST = "db"
+
+
+def get_secret(name, default=None):
+    import os
+    value = os.getenv(name)
+    if value:
+        return value
+
+    file_path = os.getenv(f"{name}_FILE")
+    if file_path and Path(file_path).exists():
+        return Path(file_path).read_text().strip()
+
+    return default
+
+DB_USER = get_secret("DB_USER", "adminToDo")
+DB_PASSWORD = get_secret("DB_PASSWORD", "")
+DB_HOST = get_secret("DB_HOST", "db")
+DB_NAME = get_secret("DB_NAME", "ToDoProject")

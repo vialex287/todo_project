@@ -108,7 +108,6 @@ async def test_db(async_engine):
 @pytest.fixture(autouse=True)
 async def clean_db(test_db):
     yield
-    # очищаем таблицы после каждого теста
     for table in reversed(Base.metadata.sorted_tables):
         await test_db.execute(table.delete())
     await test_db.commit()
