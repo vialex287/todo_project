@@ -1,6 +1,5 @@
 import asyncio
 import re
-
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,7 +34,7 @@ def validate_email(email: str | None) -> str | None:
         raise ValueError("Invalid email format")
     return email
 
-
+  
 async def wait_for_db():
     import aiomysql
 
