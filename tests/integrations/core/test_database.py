@@ -6,8 +6,6 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base, SessionLocal, engine
 
-# pytest tests/integrations/core/test_database.py
-
 
 class TestDatabaseSuccess:
     def test_engine_instance(self):
