@@ -34,7 +34,7 @@ def validate_email(email: str | None) -> str | None:
         raise ValueError("Invalid email format")
     return email
 
-  
+
 async def wait_for_db():
     import aiomysql
 
