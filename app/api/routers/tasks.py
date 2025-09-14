@@ -35,7 +35,6 @@ async def get_task(
     return await get_task_from_user(user_id, task_id, db)
 
 
-# обновить задачу
 @router_tasks.put("/{task_id}", response_model=TaskResponseSchema)
 async def update_task(
     user_id: int,
@@ -46,7 +45,6 @@ async def update_task(
     return await update_task_from_user(user_id, task_id, new_data, db)
 
 
-# удалить задачу
 @router_tasks.delete("/{task_id}")
 async def delete_task(
     user_id: int, task_id: int, db: AsyncSession = Depends(get_async_db)
