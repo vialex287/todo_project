@@ -80,6 +80,8 @@ class TestUsersCRUD:
 # ------------------------------------------------------
 # AUTH
 # ------------------------------------------------------
+
+
 @pytest.mark.asyncio
 class TestUsersAuth:
 
@@ -155,6 +157,8 @@ class TestUsersAuth:
 # ------------------------------------------------------
 # ERRORS
 # ------------------------------------------------------
+
+
 @pytest.mark.asyncio
 class TestUsersErrors:
 

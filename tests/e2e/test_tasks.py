@@ -1,5 +1,3 @@
-# pytest tests/e2e/test_tasks.py
-
 from datetime import datetime, timedelta, timezone
 
 import pytest

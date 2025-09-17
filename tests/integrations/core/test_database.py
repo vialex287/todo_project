@@ -8,6 +8,7 @@ from app.core.database import Base, SessionLocal, engine
 
 
 class TestDatabaseSuccess:
+
     def test_engine_instance(self):
         assert isinstance(engine, AsyncEngine)
 
@@ -21,6 +22,7 @@ class TestDatabaseSuccess:
 
 
 class TestDatabaseErrors:
+
     def test_invalid_database_url(self, monkeypatch):
         monkeypatch.setenv("DB_TYPE", "invalid_driver")
         from app.core.config import Settings

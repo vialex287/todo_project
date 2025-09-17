@@ -1,15 +1,13 @@
-# import pytest
-
 from app.models.users import User
 from app.schemas.users import UserRoleEnum
-
-# pytest tests\units\models\test_user_models.py -v
 
 
 class TestUserModelValid:
 
     # default #
+
     def test_user_create_default(self):
+
         user = User(name="Test User", email="test@example.com", password="password_123")
 
         assert user.name == "Test User"
@@ -28,10 +26,12 @@ class TestUserModelValid:
         assert hasattr(User, "is_active")
 
     # email #
+
     def test_user_email_unique_constraint(self):
         assert User.email.unique is True
 
     # role #
+
     def test_user_role_default(self):
         assert User.role.default.arg == UserRoleEnum.USER
 
@@ -49,10 +49,12 @@ class TestUserModelValid:
         assert User.role.nullable is False
 
     # password #
+
     def test_user_password_not_nullable(self):
         assert User.password.nullable is False
 
     # relationship tasks
+
     def test_user_relationship_tasks(self):
         assert hasattr(User, "tasks")
         assert User.tasks.property.uselist is True

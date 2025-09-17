@@ -11,8 +11,6 @@ from app.schemas.tasks import (
     TaskUpdateSchema,
 )
 
-# pytest tests/integrations/schemas/test_tasks_schema.py
-
 # ------------------------------------------------------
 # SUCCESS
 # ------------------------------------------------------

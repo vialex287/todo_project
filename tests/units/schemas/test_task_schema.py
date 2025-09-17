@@ -10,8 +10,6 @@ from app.schemas.tasks import (
     TaskUpdateSchema,
 )
 
-# pytest tests\units\schemas\test_task_schema.py -v
-
 
 class TestTaskCreateSchema:
 
@@ -42,7 +40,7 @@ class TestTaskCreateSchema:
         assert schema.status == TaskEnum.IN_PROGRESS
         assert schema.is_completed is False
 
-    # errors #
+    # errors
 
     def test_missing_title(self):
         with pytest.raises(ValidationError):
@@ -105,6 +103,7 @@ class TestTaskCreateSchema:
 
 
 class TestTaskUpdateSchema:
+
     def test_update_empty(self):
         schema = TaskUpdateSchema()
         assert schema.title is None
@@ -133,7 +132,7 @@ class TestTaskUpdateSchema:
         assert schema.status == TaskEnum.EXPIRED
         assert schema.deadline == new_deadline
 
-    # errors #
+    # errors
 
     def test_update_invalid_status(self):
         with pytest.raises(ValidationError):

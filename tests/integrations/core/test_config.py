@@ -5,6 +5,7 @@ from app.core.config import Settings
 
 
 class TestConfig:
+
     def test_settings_fields(self, test_settings):
         s = test_settings
         assert isinstance(s.DB_TYPE, str)

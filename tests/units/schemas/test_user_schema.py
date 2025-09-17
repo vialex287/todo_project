@@ -9,14 +9,10 @@ from app.schemas.users import (
     UserUpdateSchema,
 )
 
-# pytest tests\units\schemas\test_user_schema.py -v
-
 
 class TestUserCreateSchema:
 
     def test_valid(self):
-        """A test with correct data"""
-
         data = {
             "name": "Anna",
             "email": "anna@example.com",
@@ -30,8 +26,6 @@ class TestUserCreateSchema:
         assert schema.role == UserRoleEnum.USER
 
     def test_default_role(self):
-        """A test with a default role"""
-
         data = {
             "name": "Alice",
             "email": "alice@example.com",
@@ -42,8 +36,6 @@ class TestUserCreateSchema:
         assert schema.role == UserRoleEnum.USER
 
     def test_custom_role(self):
-        """A test with a custom role"""
-
         data = {
             "name": "Bob",
             "email": "bob@example.com",
@@ -55,7 +47,6 @@ class TestUserCreateSchema:
         assert schema.role == UserRoleEnum.ADMIN
 
     def test_field_ignored(self):
-        """a test to check if a non-existent field is ignored"""
 
         data = {
             "name": "Bob",
@@ -68,7 +59,7 @@ class TestUserCreateSchema:
         assert not hasattr(schema, "id")
         assert not hasattr(schema, "field")
 
-    # errors #
+    # errors
 
     def test_invalid_email(self):
         data = {
@@ -86,6 +77,7 @@ class TestUserCreateSchema:
 
 
 class TestUserUpdateSchema:
+
     def test_empty_update(self):
         schema = UserUpdateSchema()
         assert schema.name is None
@@ -109,11 +101,11 @@ class TestUserUpdateSchema:
         schema = UserUpdateSchema(email="test@example.com")
         assert schema.email == "test@example.com"
 
-    # errors #
+    # errors
 
     def test_invalid_email(self):
         with pytest.raises(ValidationError):
-            UserUpdateSchema(email="not-an-email")  # ✅
+            UserUpdateSchema(email="not-an-email")
 
 
 class TestUserResponseSchema:
@@ -150,7 +142,7 @@ class TestUserResponseSchema:
         assert schema.role == UserRoleEnum.USER
         assert schema.is_active is True
 
-    # errors #
+    # errors
 
     def test_missing_required_field(self):
         data = {
@@ -180,7 +172,7 @@ class TestUserAuthSchema:
         assert schema.email == "user@example.com"
         assert schema.password == "Password123"
 
-    # errors #
+    # errors
 
     def test_invalid_email(self):
         data = {

@@ -14,11 +14,14 @@ from app.schemas.tasks import TaskEnum
 
 @pytest.mark.asyncio
 class TestTasksCreate:
+
     async def test_create_task(self, test_client, test_db, user_factory):
         user = user_factory()
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
+
+        test_client.set_current_user(user)
 
         payload = {
             "title": "Test Task",
@@ -37,11 +40,14 @@ class TestTasksCreate:
 
 @pytest.mark.asyncio
 class TestTasksRead:
+
     async def test_get_tasks_empty(self, test_client, test_db, user_factory):
         user = user_factory()
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
+
+        test_client.set_current_user(user)
 
         resp = await test_client.get(f"/{user.id}/tasks/")
         assert resp.status_code == 200
@@ -56,6 +62,8 @@ class TestTasksRead:
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
+
+        test_client.set_current_user(user)
 
         task1 = task_factory(user_id=user.id, title="Task 1")
         task2 = task_factory(user_id=user.id, title="Task 2")
@@ -81,6 +89,8 @@ class TestTasksRead:
         await test_db.commit()
         await test_db.refresh(user)
 
+        test_client.set_current_user(user)
+
         task = task_factory(user_id=user.id, title="Sample Task")
         test_db.add(task)
         await test_db.commit()
@@ -92,14 +102,38 @@ class TestTasksRead:
         assert data["id"] == task.id
         assert data["title"] == "Sample Task"
 
+    async def test_get_task_from_another_user_forbidden(
+        self, test_client, test_db, user_factory, task_factory
+    ):
+        user1 = user_factory()
+        user2 = user_factory()
+        test_db.add_all([user1, user2])
+        await test_db.commit()
+        await test_db.refresh(user1)
+        await test_db.refresh(user2)
+
+        task = task_factory(user_id=user1.id)
+        test_db.add(task)
+        await test_db.commit()
+        await test_db.refresh(task)
+
+        test_client.set_current_user(user2)
+
+        resp = await test_client.get(f"/{user2.id}/tasks/{task.id}")
+        assert resp.status_code == 403
+        assert resp.json()["detail"] == "Task does not belong to this user"
+
 
 @pytest.mark.asyncio
 class TestTasksUpdate:
+
     async def test_update_task(self, test_client, test_db, user_factory, task_factory):
         user = user_factory()
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
+
+        test_client.set_current_user(user)
 
         task = task_factory(user_id=user.id, title="Old Title")
         test_db.add(task)
@@ -120,14 +154,39 @@ class TestTasksUpdate:
         assert data["is_completed"] is True
         assert data["status"] == TaskEnum.DONE
 
+    async def test_update_task_wrong_user(
+        self, test_client, test_db, user_factory, task_factory
+    ):
+        user1 = user_factory()
+        user2 = user_factory()
+        test_db.add_all([user1, user2])
+        await test_db.commit()
+        await test_db.refresh(user1)
+        await test_db.refresh(user2)
+
+        task = task_factory(user_id=user1.id)
+        test_db.add(task)
+        await test_db.commit()
+        await test_db.refresh(task)
+
+        test_client.set_current_user(user2)
+
+        payload = {"title": "Hack"}
+        resp = await test_client.put(f"/{user2.id}/tasks/{task.id}", json=payload)
+        assert resp.status_code == 403
+        assert resp.json()["detail"] == "You are not admin"
+
 
 @pytest.mark.asyncio
 class TestTasksDelete:
+
     async def test_delete_task(self, test_client, test_db, user_factory, task_factory):
         user = user_factory(role="admin")
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
+
+        test_client.set_current_user(user)
 
         task = task_factory(user_id=user.id, title="Old Title")
         test_db.add(task)
@@ -179,7 +238,9 @@ class TestTasksErrors:
             "app.models.tasks.Task.update_status", side_effect=Exception("boom")
         ):
             with pytest.raises(HTTPException) as exc:
-                await tasks_service.create_task_user(user.id, task_data, db=test_db)
+                await tasks_service.create_task_user(
+                    user.id, task_data, db=test_db, current_user=user
+                )
 
         assert exc.value.status_code == 500
 
@@ -203,6 +264,35 @@ class TestTasksErrors:
         errors = [err["msg"] for err in resp.json()["detail"]]
         assert any("valid datetime" in msg for msg in errors)
 
+    async def test_create_task_user_not_found(self, test_client, test_db, user_factory):
+        user = user_factory()
+        test_db.add(user)
+        await test_db.commit()
+
+        test_client.set_current_user(user)
+
+        payload = {"title": "X", "description": "Y", "deadline": "2030-01-01T00:00:00"}
+        resp = await test_client.post("/9999/tasks/", json=payload)
+        assert resp.status_code == 404
+
+    async def test_create_task_internal_error(
+        self, monkeypatch, test_client, test_db, user_factory
+    ):
+        user = user_factory()
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+        test_client.set_current_user(user)
+
+        async def broken_commit():
+            raise Exception("DB crash")
+
+        monkeypatch.setattr(test_db, "commit", broken_commit)
+
+        payload = {"title": "X", "description": "Y", "deadline": "2030-01-01T00:00:00"}
+        resp = await test_client.post(f"/{user.id}/tasks/", json=payload)
+        assert resp.status_code == 500
+
     async def test_get_task_from_wrong_user(
         self, test_client, test_db, user_factory, task_factory
     ):
@@ -212,6 +302,8 @@ class TestTasksErrors:
         await test_db.commit()
         await test_db.refresh(user1)
         await test_db.refresh(user2)
+
+        test_client.set_current_user(user2)
 
         task = task_factory(user_id=user1.id, title="Secret task")
         test_db.add(task)
@@ -226,6 +318,8 @@ class TestTasksErrors:
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
+
+        test_client.set_current_user(user)
 
         resp = await test_client.put(
             f"/{user.id}/tasks/99999",
@@ -262,10 +356,23 @@ class TestTasksErrors:
 
         with pytest.raises(HTTPException) as exc:
             await tasks_service.update_task_from_user(
-                user.id, task.id, new_data, db=test_db
+                user.id, task.id, new_data, db=test_db, current_user=user
             )
 
         assert exc.value.status_code == 500
+
+    async def test_update_task_not_found(self, test_client, test_db, user_factory):
+        user = user_factory()
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        test_client.set_current_user(user)
+
+        payload = {"title": "Updated"}
+        resp = await test_client.put(f"/{user.id}/tasks/999", json=payload)
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Task is not found"
 
     async def test_delete_task_wrong_user(
         self, test_client, test_db, user_factory, task_factory
@@ -276,6 +383,8 @@ class TestTasksErrors:
         await test_db.commit()
         await test_db.refresh(user1)
         await test_db.refresh(user2)
+
+        test_client.set_current_user(user2)
 
         task = task_factory(user_id=user1.id)
         test_db.add(task)
@@ -305,6 +414,46 @@ class TestTasksErrors:
         )
 
         with pytest.raises(HTTPException) as exc:
-            await tasks_service.delete_task_from_user(user.id, task.id, db=test_db)
+            await tasks_service.delete_task_from_user(
+                user.id, task.id, db=test_db, current_user=user
+            )
 
         assert exc.value.status_code == 500
+
+    async def test_delete_task_internal_error(
+        self, test_db, user_factory, task_factory, monkeypatch
+    ):
+        user = user_factory(role="admin")
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        task = task_factory(user_id=user.id)
+        test_db.add(task)
+        await test_db.commit()
+        await test_db.refresh(task)
+
+        monkeypatch.setattr(
+            test_db, "delete", lambda _: (_ for _ in ()).throw(Exception("boom"))
+        )
+
+        from app.services import tasks_service
+
+        with pytest.raises(HTTPException) as exc:
+            await tasks_service.delete_task_from_user(
+                user.id, task.id, db=test_db, current_user=user
+            )
+
+        assert exc.value.status_code == 500
+
+    async def test_delete_task_not_found(self, test_client, test_db, user_factory):
+        user = user_factory()
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        test_client.set_current_user(user)
+
+        resp = await test_client.delete(f"/{user.id}/tasks/999")
+        assert resp.status_code == 404
+        assert resp.json()["detail"] == "Task is not found"

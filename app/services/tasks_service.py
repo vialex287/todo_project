@@ -1,19 +1,25 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_async_db, task_valid, user_valid
+from app.dependencies import task_valid, user_valid
 from app.models.tasks import Task
 from app.models.users import User
 from app.schemas.tasks import TaskCreateSchema, TaskUpdateSchema
 
 
 async def create_task_user(
-    user_id: int, task_data: TaskCreateSchema, db: AsyncSession = Depends(get_async_db)
+    user_id: int,
+    task_data: TaskCreateSchema,
+    db: AsyncSession,
+    current_user: User,
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
+
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     new_task = Task(
         user_id=user_id,
@@ -38,9 +44,16 @@ async def create_task_user(
         )
 
 
-async def get_tasks_from_user(user_id: int, db: AsyncSession = Depends(get_async_db)):
+async def get_tasks_from_user(
+    user_id: int,
+    db: AsyncSession,
+    current_user: User,
+):
     user = await db.get(User, user_id)
     await user_valid(user)
+
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     res_tasks = await db.execute(select(Task).where(Task.user_id == user.id))
     tasks = res_tasks.scalars().all()
@@ -51,11 +64,17 @@ async def get_tasks_from_user(user_id: int, db: AsyncSession = Depends(get_async
 
 
 async def get_task_from_user(
-    user_id: int, task_id: int, db: AsyncSession = Depends(get_async_db)
+    user_id: int,
+    task_id: int,
+    db: AsyncSession,
+    current_user: User,
 ):
 
     user = await db.get(User, user_id)
     await user_valid(user)
+
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     task = await db.get(Task, task_id)
     await task_valid(task)
@@ -67,7 +86,8 @@ async def get_task_from_user(
         return task
     except Exception:
         raise HTTPException(
-            status_code=500, detail="Произошла внутренняя ошибка сервера"
+            status_code=500,
+            detail="An internal server error occurred " + "when updating the object",
         )
 
 
@@ -75,16 +95,23 @@ async def update_task_from_user(
     user_id: int,
     task_id: int,
     new_data: TaskUpdateSchema,
-    db: AsyncSession = Depends(get_async_db),
+    db: AsyncSession,
+    current_user: User,
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
+
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     task = await db.get(Task, task_id)
     await task_valid(task)
 
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+
+    if task.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You are not admin")
 
     if new_data.title:
         task.title = new_data.title
@@ -95,11 +122,8 @@ async def update_task_from_user(
     if new_data.deadline:
         task.deadline = new_data.deadline
 
-    if new_data.is_completed:
+    if new_data.is_completed is not None:
         task.is_completed = new_data.is_completed
-
-    if task.user_id != user.id:
-        raise HTTPException(status_code=403, detail="You are not admin")
 
     try:
         await task.update_status()
@@ -115,10 +139,16 @@ async def update_task_from_user(
 
 
 async def delete_task_from_user(
-    user_id: int, task_id: int, db: AsyncSession = Depends(get_async_db)
+    user_id: int,
+    task_id: int,
+    db: AsyncSession,
+    current_user: User,
 ):
     user = await db.get(User, user_id)
     await user_valid(user)
+
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     task = await db.get(Task, task_id)
     await task_valid(task)
@@ -127,12 +157,11 @@ async def delete_task_from_user(
         raise HTTPException(status_code=404, detail="Task not found")
 
     if task.user_id != user.id:
-        raise HTTPException(status_code=403, detail="You are not admin")
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     try:
         await db.delete(task)
         await db.commit()
-        await db.flush()
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception:
         raise HTTPException(

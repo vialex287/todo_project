@@ -3,10 +3,9 @@ from jose import jwt
 
 from app.core.config import settings
 
-# pytest tests/e2e/test_auth.py
-
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthE2E:
 
     async def test_register(self, client):
