@@ -43,7 +43,7 @@ def email_random():
     return f'{"".join(name_email[:8])}@example.com'
 
 
-# --- DATABASE --- #
+# DATABASE
 
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 engine_test = create_async_engine(DATABASE_URL, future=True)
@@ -78,7 +78,7 @@ async def client():
         yield c
 
 
-# --- AUTH --- #
+# AUTH
 
 
 @pytest.fixture

@@ -10,8 +10,6 @@ from app.schemas.users import (
     UserUpdateSchema,
 )
 
-# pytest tests/integrations/schemas/test_users_schema.py
-
 # ------------------------------------------------------
 # SUCCESS
 # ------------------------------------------------------

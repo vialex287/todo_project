@@ -14,7 +14,7 @@ async def get_users_(
     current_user: User = Depends(get_current_user),
 ):
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="You are not admin")
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     result = await db.execute(select(User))
     users = result.scalars().all()
@@ -32,8 +32,8 @@ async def get_user_(
     user = await db.get(User, user_id)
     await user_valid(user)
 
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="You are not admin")
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     try:
         return user
@@ -53,23 +53,22 @@ async def update_user_(
     user = await db.get(User, user_id)
     await user_valid(user)
 
-    if current_user.id != user.id and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="You are not admin")
+    if current_user.role != "admin" and current_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
-    if new_data.name:
+    if new_data.name is not None:
         user.name = new_data.name
 
     if new_data.email is not None:
         user.email = new_data.email
 
-    if new_data.password:
+    if new_data.password is not None:
         user.password = new_data.password
 
-    if current_user.role != "admin" and new_data.role is not None:
-        raise HTTPException(status_code=403, detail="You are not admin")
-    elif current_user.role == "admin" and new_data.role is not None:
+    if new_data.role is not None:
+        if current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Not enough permissions")
         user.role = new_data.role
-
     try:
         await db.commit()
         await db.refresh(user)

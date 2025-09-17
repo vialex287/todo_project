@@ -7,6 +7,10 @@ from app.core.database import Base
 from app.schemas.tasks import TaskEnum
 
 
+def default_deadline():
+    return datetime.now(timezone.utc) + timedelta(days=1)
+
+
 class Task(Base):
     __tablename__ = "Tasks"
     __table_args__ = {"extend_existing": True}
@@ -18,7 +22,9 @@ class Task(Base):
         Enum(TaskEnum), default=TaskEnum.IN_PROGRESS, nullable=False, index=True
     )
     deadline = Column(
-        DateTime, default=(datetime.now(timezone.utc) + timedelta(days=1)), index=True
+        DateTime,
+        default=lambda: datetime.now(timezone.utc) + timedelta(days=1),
+        index=True,
     )
     is_completed = Column(Boolean, default=False, index=True)
 

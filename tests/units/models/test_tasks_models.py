@@ -6,8 +6,6 @@ from app.models.tasks import Task
 from app.models.users import User
 from app.schemas.tasks import TaskEnum
 
-# pytest tests\units\models\test_tasks_models.py -v
-
 
 class TestTaskModel:
     def test_task_creation_basic(self):

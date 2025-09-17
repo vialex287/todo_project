@@ -6,9 +6,9 @@ from fastapi import HTTPException
 from app.dependencies import task_valid, user_valid, validate_email
 
 
+@pytest.mark.asyncio
 class TestUserValid:
 
-    @pytest.mark.asyncio
     async def test_user_valid_with_user(self):
         mock_user = MagicMock()
 
@@ -16,7 +16,6 @@ class TestUserValid:
         assert isinstance(result, bool)
         assert result is True
 
-    @pytest.mark.asyncio
     async def test_user_valid_without_user(self):
         with pytest.raises(HTTPException) as exc_info:
             await user_valid(None)
@@ -25,8 +24,9 @@ class TestUserValid:
         assert exc_info.value.detail == "User is not found"
 
 
+@pytest.mark.asyncio
 class TestTaskValid:
-    @pytest.mark.asyncio
+
     async def test_task_valid_with_task(self):
         mock_task = MagicMock()
 
@@ -34,7 +34,6 @@ class TestTaskValid:
         assert isinstance(result, bool)
         assert result is True
 
-    @pytest.mark.asyncio
     async def test_task_valid_without_task(self):
         with pytest.raises(HTTPException) as exc_info:
             await task_valid(None)
@@ -44,6 +43,7 @@ class TestTaskValid:
 
 
 class TestValidateEmail:
+
     def test_validate_email_valid(self):
         result = validate_email("test@example.com")
         assert result == "test@example.com"
@@ -60,7 +60,7 @@ class TestValidateEmail:
         result = validate_email("test@sub.example.com")
         assert result == "test@sub.example.com"
 
-    # errrors #
+    # errors
 
     @pytest.mark.parametrize(
         "invalid_email",

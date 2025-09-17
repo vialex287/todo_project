@@ -12,9 +12,9 @@ from app.schemas.users import UserRoleEnum
 # ------------------------------------------------------
 
 
+@pytest.mark.asyncio
 class TestUserModelSuccess:
 
-    @pytest.mark.asyncio
     async def test_create_user(self, test_db):
         user = User(
             name="Alice",
@@ -33,7 +33,6 @@ class TestUserModelSuccess:
         assert user.role == UserRoleEnum.ADMIN
         assert user.is_active is True
 
-    @pytest.mark.asyncio
     async def test_update_user(self, test_db, user_factory):
         user = user_factory(email="bob@example.com", name="Bob")
         test_db.add(user)
@@ -46,7 +45,6 @@ class TestUserModelSuccess:
 
         assert user.name == "Bobby"
 
-    @pytest.mark.asyncio
     async def test_delete_user(self, test_db, user_factory):
         user = user_factory(email="delete@example.com")
         test_db.add(user)
@@ -60,14 +58,12 @@ class TestUserModelSuccess:
         deleted = await test_db.get(User, user_id)
         assert deleted is None
 
-    @pytest.mark.asyncio
     async def test_user_with_tasks_relationship(self, test_db, user_factory):
         user = user_factory(email="withtasks@example.com")
         test_db.add(user)
         await test_db.commit()
         await test_db.refresh(user)
 
-        # создаем связанные задачи
         task1 = Task(title="Task 1", description="desc1", user_id=user.id)
         task2 = Task(title="Task 2", description="desc2", user_id=user.id)
         test_db.add_all([task1, task2])
@@ -89,9 +85,9 @@ class TestUserModelSuccess:
 # ------------------------------------------------------
 
 
+@pytest.mark.asyncio
 class TestUserModelErrors:
 
-    @pytest.mark.asyncio
     async def test_unique_email_constraint(self, test_db, user_factory):
         user1 = user_factory(email="unique@example.com")
         user2 = user_factory(email="unique@example.com")
@@ -104,7 +100,6 @@ class TestUserModelErrors:
             await test_db.commit()
         await test_db.rollback()
 
-    @pytest.mark.asyncio
     async def test_null_password_not_allowed(self, test_db):
         user = User(name="NoPass", email="nopass@example.com", password=None)
         test_db.add(user)

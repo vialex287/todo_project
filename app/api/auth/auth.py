@@ -25,7 +25,7 @@ pwd_context = CryptContext(
 )
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-# --- TOKENS --- #
+# TOKENS
 
 
 def create_access_token(data: dict):
@@ -97,7 +97,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-# --- OTHER --- #
+# OTHER
 
 
 def hash_password(password: str) -> str:
